@@ -1,0 +1,23 @@
+- name: Get current list of images
+  openstack.cloud.image_info:
+    filters:
+      name: "{{ item.name }}"
+  loop: "{{ images }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: current_images  
+
+- name: Delete older image versions
+  openstack.cloud.image:
+    name: "{{ id }}"
+    state: absent
+  vars:
+    tags_release: "{{ item.0.item.tags | default([]) + [release_id] }}" 
+    tags_current: "{{ item.1.tags }}"
+    id: "{{ item.1.id }}"
+  when: tags_release | sort != tags_current | sort
+  loop: "{{ current_images.results | subelements('openstack_images') }}"
+  loop_control:
+    label: "{{ item.1.name }}, {{ id }}"
+  retries: 4
+  delay: 30

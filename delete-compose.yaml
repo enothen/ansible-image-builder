@@ -1,0 +1,30 @@
+---
+- name: Playbook to test deleting composes
+  hosts: localhost
+  connection: local
+  become: False
+  gather_facts: False
+
+  tasks:
+    - name: composes
+      prompt: Enter comma-separated ids of compose to delete:
+      private: false
+
+    - name: Create list of compose ids
+      set_fact:
+        composes_list: "{{ composes.split(',') }}"
+
+    - name: Get refresh token
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: get-refresh-token
+
+    - name: Delete compose
+      ansible.builtin.uri:
+        url: "{{ api_endpoint }}/composes/{{ item }}"
+        method: DELETE
+        headers:
+          Authorization: Bearer {{ refresh_token.json.access_token }}
+          Content-Type: application/json
+        status_code: 200
+      loop: "{{ composes_list }}"

@@ -1,0 +1,9 @@
+- name: Get available distributions
+  ansible.builtin.uri:
+    url: "{{ api_endpoint }}/distributions"
+    method: GET
+    headers:
+      Authorization: Bearer {{ refresh_token.json.access_token }}
+      Content-Type: application/json
+    status_code: 200
+  register: distributions

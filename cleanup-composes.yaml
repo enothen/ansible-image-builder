@@ -1,0 +1,48 @@
+---
+- name: Playbook to delete old composes from image builder
+  hosts: localhost
+  connection: local
+  become: False
+  gather_facts: False
+
+  tasks:
+    - name: Get refresh token
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: get-refresh-token
+
+    - name: Get previous composes
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: get-composes
+
+    - name: Deleting these composes
+      tags: never
+      debug:
+        msg: "{{ item.id }}"
+      loop: "{{ composes.json.data }}"
+      loop_control:
+        label: "{{ image_name }}"
+      vars:
+        image_name: "{{ item.image_name | default(False) }}"
+      when: 
+        - image_name
+        - images | selectattr('name', 'match', image_name) | length > 0
+
+    - name: Delete compose
+      ansible.builtin.uri:
+        url: "{{ api_endpoint }}/composes/{{ item.id }}"
+        method: DELETE
+        headers:
+          Authorization: Bearer {{ refresh_token.json.access_token }}
+          Content-Type: application/json
+        status_code: 200
+      loop: "{{ composes.json.data }}"
+      loop_control:
+        label: "{{ image_name }}"
+      vars:
+        image_name: "{{ item.image_name | default(False) }}"
+      when: 
+        - image_name
+        - images | selectattr('name', 'match', image_name) | length > 0
+      

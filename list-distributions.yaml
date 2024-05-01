@@ -1,0 +1,21 @@
+---
+- name: Playbook to list available distributions in image builder
+  hosts: localhost
+  connection: local
+  become: False
+  gather_facts: False
+
+  tasks:
+    - name: Get refresh token
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: get-refresh-token
+
+    - name: Get available RHEL distributions
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: get-distributions
+
+    - name: Show available distributions
+      debug:
+        var: distributions.json

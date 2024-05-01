@@ -1,0 +1,66 @@
+---
+- name: This playbook creates qcow2 image(s) using the image-builder service
+  hosts: localhost
+  gather_facts: False
+  become: False
+
+  tasks:
+    - name: Get refresh token
+      tags: 
+        - token
+        - always
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: get-refresh-token
+
+    - name: Check if image exists
+      ansible.builtin.stat:
+        path: "./{{ item.name }}-{{ item.release_id }}.qcow2"
+      loop: "{{ images }}"
+      loop_control:
+        label: "{{ item.name }}"
+      register: filecheck
+
+    - name:  Show file status
+      debug:
+        msg: "{{ item.stat }}"
+      loop: "{{ filecheck.results }}"
+      loop_control:
+        label: "{{ item.invocation.module_args.path }}"
+      when: not item.stat.exists
+
+    - name: Request creation of images
+      tags:
+        - compose
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: request-image-creation
+
+    - name: Download images
+      tags:
+        - download
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: download-images
+
+    - name: Run customization tasks on images
+      tags:
+        - customize
+        - never
+      ansible.builtin.import_role:
+        name: qcow_image
+        tasks_from: customize
+
+    - name: Upload images to rhosp
+      tags:
+        - upload
+      ansible.builtin.import_role:
+        name: qcow_image
+        tasks_from: upload-to-rhosp
+
+    - name: Delete older image versions
+      tags:
+        - delete
+      ansible.builtin.import_role:
+        name: qcow_image
+        tasks_from: delete

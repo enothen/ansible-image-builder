@@ -1,0 +1,11 @@
+---
+- name: Playbook to customize existing qcow2 image(s)
+  hosts: localhost
+  gather_facts: False
+  become: False
+
+  tasks:
+    - name: Run customization tasks
+      ansible.builtin.import_role:
+        name: qcow_image
+        tasks_from: customize

@@ -1,0 +1,8 @@
+#
+# Red Hat APIs and tokens are explained here:
+# https://access.redhat.com/articles/3626371
+#
+
+# Offline token is necessary to request an access token
+# that is used when interacting with the image builder API.
+offline_token: "{{ vault_offline_token }}"

@@ -1,0 +1,5 @@
+# Endpoint required to request offline token
+sso_endpoint: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
+
+# Endpoint required to interact with image builer
+api_endpoint: https://console.redhat.com/api/image-builder/v1

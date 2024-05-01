@@ -1,0 +1,28 @@
+---
+- name: Playbook to list available composes in image builder
+  hosts: localhost
+  connection: local
+  become: False
+  gather_facts: False
+
+  tasks:
+    - name: Get refresh token
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: get-refresh-token
+
+    - name: Get previous composes
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: get-composes
+
+    - name: List available composes
+      ansible.builtin.debug:
+        msg:
+          - "created_at: {{ item.created_at }}"
+          - "image_name: {{ item.image_name | default('No name') }}"
+          - "image_description: {{ item.request.image_description | default('No description') }}"
+          - "distribution: {{ item.request.distribution }}"
+      loop: "{{ composes.json.data }}"
+      loop_control:
+        label: "id: {{ item.id }}"

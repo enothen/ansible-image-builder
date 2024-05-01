@@ -1,0 +1,53 @@
+# Image definitions
+release_id: "rel-20240430v2"
+
+filesystems:
+  base:
+    - mountpoint: /
+      min_size: 10240
+    - mountpoint: /tmp
+      min_size: 1024
+    - mountpoint: /var/tmp
+      min_size: 1024
+    - mountpoint: /var/log
+      min_size: 2048
+    - mountpoint: /home
+      min_size: 2048
+  lamp:
+    - mountpoint: /var/www/html
+      min_size: 2048
+    - mountpoint: /var/lib/mysql
+      min_size: 2048
+
+packages:
+  base:
+    - jq
+    - sysstat
+    - ipa-client
+    - openscap-scanner
+  lamp:
+    - httpd
+    - mariadb-server
+    - php
+    - php-mysqlnd
+
+images:
+  - name: rhel-8.4-base-ib
+    distribution: rhel-84
+    filesystem: "{{ filesystems.base }}"
+    packages: "{{ packages.base }}"
+    release_id: "{{ release_id }}"
+
+  - name: rhel-9.2-base-ib
+    distribution: rhel-92
+    filesystem: "{{ filesystems.base }}"
+    packages: "{{ packages.base }}"
+    release_id: "{{ release_id }}"
+
+  - name: rhel-9-lamp-ib
+    distribution: rhel-9
+    tags:
+      - lamp
+    filesystem: "{{ filesystems.base + filesystems.lamp }}"
+    packages: "{{ packages.base + packages.lamp }}"
+    release_id: "{{ release_id }}"
