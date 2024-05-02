@@ -107,6 +107,84 @@ PLAY RECAP *********************************************************************
 localhost                  : ok=9    changed=3    unreachable=0    failed=0    skipped=3    rescued=0    ignored=0
 ```
 
+### list-distributions.yaml
+Image builder allows building images with speciifc minor OS versions, such as RHEL 8.4, or 9.2, but these options are not listed on the web interface. This playbook uses one of the API methods to list all possible options.
+
+```
+PLAY [Playbook to list available distributions in image builder] ***************
+
+TASK [image_builder : Get refresh_token from offline_token] ********************
+ok: [localhost]
+
+TASK [image_builder : Get available distributions] *****************************
+ok: [localhost]
+
+TASK [Show available distributions] ********************************************
+ok: [localhost] => {
+    "distributions.json": [
+        {
+            "description": "Red Hat Enterprise Linux (RHEL) 8",
+            "name": "rhel-84"
+        },
+        {
+            "description": "Red Hat Enterprise Linux (RHEL) 8",
+            "name": "rhel-87"
+        },
+        {
+            "description": "Red Hat Enterprise Linux (RHEL) 8",
+            "name": "rhel-89"
+        },
+        {
+            "description": "Red Hat Enterprise Linux (RHEL) 9",
+            "name": "rhel-90"
+        },
+        {
+            "description": "Red Hat Enterprise Linux (RHEL) 8",
+            "name": "rhel-8"
+        },
+        {
+            "description": "CentOS Stream 8",
+            "name": "centos-8"
+        },
+        {
+            "description": "Red Hat Enterprise Linux (RHEL) 8",
+            "name": "rhel-88"
+        },
+        {
+            "description": "Red Hat Enterprise Linux (RHEL) 8",
+            "name": "rhel-86"
+        },
+        {
+            "description": "CentOS Stream 9",
+            "name": "centos-9"
+        },
+        {
+            "description": "Red Hat Enterprise Linux (RHEL) 8",
+            "name": "rhel-85"
+        },
+        {
+            "description": "Red Hat Enterprise Linux (RHEL) 9",
+            "name": "rhel-92"
+        },
+        {
+            "description": "Red Hat Enterprise Linux (RHEL) 9",
+            "name": "rhel-91"
+        },
+        {
+            "description": "Red Hat Enterprise Linux (RHEL) 9",
+            "name": "rhel-9"
+        },
+        {
+            "description": "Red Hat Enterprise Linux (RHEL) 9",
+            "name": "rhel-93"
+        }
+    ]
+}
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+```
+
 ### cleanup-composes.yaml
 This playbook will delete compose requests in image builder, where the `image_name` matches the definitions.
 
