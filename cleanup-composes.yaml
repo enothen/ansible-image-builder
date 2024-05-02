@@ -17,17 +17,16 @@
         tasks_from: get-composes
 
     - name: Deleting these composes
-      tags: never
       debug:
-        msg: "{{ item.id }}"
+        msg: "{{ item.image_name }}"
       loop: "{{ composes.json.data }}"
       loop_control:
-        label: "{{ image_name }}"
+        label: "{{ item.id }}"
       vars:
-        image_name: "{{ item.image_name | default(False) }}"
+        image_name: "{{ item.image_name | default(omit) }}"
       when: 
-        - image_name
-        - images | selectattr('name', 'match', image_name) | length > 0
+        - image_name is defined
+        - images | selectattr('name', 'match', image_name) | list | length > 0
 
     - name: Delete compose
       ansible.builtin.uri:
@@ -39,10 +38,9 @@
         status_code: 200
       loop: "{{ composes.json.data }}"
       loop_control:
-        label: "{{ image_name }}"
+        label: "{{ item.id }}"
       vars:
-        image_name: "{{ item.image_name | default(False) }}"
+        image_name: "{{ item.image_name | default(omit) }}"
       when: 
-        - image_name
-        - images | selectattr('name', 'match', image_name) | length > 0
-      
+        - image_name is defined
+        - images | selectattr('name', 'match', image_name) | list | length > 0
