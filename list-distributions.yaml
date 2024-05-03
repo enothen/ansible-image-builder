@@ -18,4 +18,4 @@
 
     - name: Show available distributions
       debug:
-        var: distributions.json
+        var: distributions.json | sort(attribute='name')

@@ -121,38 +121,10 @@ ok: [localhost]
 
 TASK [Show available distributions] ********************************************
 ok: [localhost] => {
-    "distributions.json": [
-        {
-            "description": "Red Hat Enterprise Linux (RHEL) 8",
-            "name": "rhel-84"
-        },
-        {
-            "description": "Red Hat Enterprise Linux (RHEL) 8",
-            "name": "rhel-87"
-        },
-        {
-            "description": "Red Hat Enterprise Linux (RHEL) 8",
-            "name": "rhel-89"
-        },
-        {
-            "description": "Red Hat Enterprise Linux (RHEL) 9",
-            "name": "rhel-90"
-        },
-        {
-            "description": "Red Hat Enterprise Linux (RHEL) 8",
-            "name": "rhel-8"
-        },
+    "distributions.json | sort(attribute='name')": [
         {
             "description": "CentOS Stream 8",
             "name": "centos-8"
-        },
-        {
-            "description": "Red Hat Enterprise Linux (RHEL) 8",
-            "name": "rhel-88"
-        },
-        {
-            "description": "Red Hat Enterprise Linux (RHEL) 8",
-            "name": "rhel-86"
         },
         {
             "description": "CentOS Stream 9",
@@ -160,15 +132,31 @@ ok: [localhost] => {
         },
         {
             "description": "Red Hat Enterprise Linux (RHEL) 8",
+            "name": "rhel-8"
+        },
+        {
+            "description": "Red Hat Enterprise Linux (RHEL) 8",
+            "name": "rhel-84"
+        },
+        {
+            "description": "Red Hat Enterprise Linux (RHEL) 8",
             "name": "rhel-85"
         },
         {
-            "description": "Red Hat Enterprise Linux (RHEL) 9",
-            "name": "rhel-92"
+            "description": "Red Hat Enterprise Linux (RHEL) 8",
+            "name": "rhel-86"
         },
         {
-            "description": "Red Hat Enterprise Linux (RHEL) 9",
-            "name": "rhel-91"
+            "description": "Red Hat Enterprise Linux (RHEL) 8",
+            "name": "rhel-87"
+        },
+        {
+            "description": "Red Hat Enterprise Linux (RHEL) 8",
+            "name": "rhel-88"
+        },
+        {
+            "description": "Red Hat Enterprise Linux (RHEL) 8",
+            "name": "rhel-89"
         },
         {
             "description": "Red Hat Enterprise Linux (RHEL) 9",
@@ -176,7 +164,23 @@ ok: [localhost] => {
         },
         {
             "description": "Red Hat Enterprise Linux (RHEL) 9",
+            "name": "rhel-90"
+        },
+        {
+            "description": "Red Hat Enterprise Linux (RHEL) 9",
+            "name": "rhel-91"
+        },
+        {
+            "description": "Red Hat Enterprise Linux (RHEL) 9",
+            "name": "rhel-92"
+        },
+        {
+            "description": "Red Hat Enterprise Linux (RHEL) 9",
             "name": "rhel-93"
+        },
+        {
+            "description": "Red Hat Enterprise Linux (RHEL) 9",
+            "name": "rhel-94"
         }
     ]
 }
