@@ -1,5 +1,5 @@
 # Image definitions
-release_id: "rel-20240502v1"
+release_id: "rel-20240430v2"
 
 filesystems:
   base:
@@ -12,8 +12,6 @@ filesystems:
     - mountpoint: /var/log
       min_size: 2048
     - mountpoint: /home
-      min_size: 2048
-    - mountpoint: /scratch
       min_size: 2048
   lamp:
     - mountpoint: /var/www/html
@@ -34,15 +32,6 @@ packages:
     - php-mysqlnd
 
 images:
-  - name: rhel-8.4-fi-ib-api
-    distribution: rhel-84
-    filesystem: "{{ filesystems.base }}"
-    packages: "{{ packages.base }}"
-    tags:
-      - breakout
-    release_id: "{{ release_id }}"
-
-images_orig:
   - name: rhel-8.4-base-ib
     distribution: rhel-84
     filesystem: "{{ filesystems.base }}"
