@@ -5,11 +5,12 @@
   become: False
   gather_facts: False
 
-  tasks:
+  vars_prompt:
     - name: composes
-      prompt: Enter comma-separated ids of compose to delete:
+      prompt: "Enter comma-separated ids of compose to delete:"
       private: false
 
+  tasks:
     - name: Create list of compose ids
       set_fact:
         composes_list: "{{ composes.split(',') }}"
