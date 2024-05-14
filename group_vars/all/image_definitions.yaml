@@ -1,5 +1,6 @@
 # Image definitions
 release_id: "rel-20240430v2"
+storage_dir: /mnt/persist/images
 
 filesystems:
   base:

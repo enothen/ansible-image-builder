@@ -67,6 +67,6 @@
   when: item.json is defined
   vars:
     image_url: "{{ item.json.image_status.upload_status.options.url }}"
-    image_path: "./{{ item.json.request.image_name }}-{{ release_id }}.qcow2"
+    image_path: "{{ storage_dir | default('.') }}/{{ item.json.request.image_name }}-{{ release_id }}.qcow2"
   retries: 4
   delay: 30

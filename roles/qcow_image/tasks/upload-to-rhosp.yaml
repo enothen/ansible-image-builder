@@ -7,7 +7,7 @@
     container_format: "{{ item.disk_format | default('bare') }}"
     disk_format: "{{ item.disk_format | default('qcow2') }}"
     state: "{{ item.state | default('present') }}"
-    filename: "./{{ item.name }}-{{ item.release_id }}.qcow2"
+    filename: "{{ storage_dir | default('.') }}/{{ item.name }}-{{ item.release_id }}.qcow2"
     tags: "{{ (item.tags | default([])) + [item.release_id] | default(omit) }}"
     properties: "{{ item.properties | default(omit) }}"
   loop: "{{ images }}"
