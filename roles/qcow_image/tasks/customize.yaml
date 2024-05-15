@@ -2,9 +2,11 @@
   tags:
     - customize_run
   ansible.builtin.shell: >
-    virt-customize -a {{ item.name }}-{{ release_id }}.qcow2
+    virt-customize -a {{ storage_dir | default('.') }}/{{ item.name }}-{{ release_id }}.qcow2
     --run /home/stack/image_lifecycle/roles/qcow_image/files/customize.sh
     --selinux-relabel
   loop: "{{ images }}"
   loop_control:
     label: "{{ item.name }}"
+  environment:
+    LIBGUESTFS_BACKEND: direct
