@@ -26,29 +26,16 @@
   retries: 20
   delay: 60
 
-- name: Start images download
-  ansible.builtin.get_url:
-    url: "{{ image_url }}"
-    dest: "{{ image_path }}"
-    mode: '0644'
-  loop: "{{ compose_status_request.results }}"
+- name: Upload images to rhosp
+  openstack.cloud.image:
+    name: "{{ item.name }}"
+    id: "{{ (compose_status_request.results | selectattr('json.request.image_name', 'match', item.name) | map(attribute='item.json.id') | first) | default(omit) }}"
+    container_format: "{{ item.disk_format | default('bare') }}"
+    disk_format: "{{ item.disk_format | default('qcow2') }}"
+    state: "{{ item.state | default('present') }}"
+    filename: "{{ storage_dir | default('.') }}/{{ item.name }}-{{ item.release_id }}.qcow2"
+    tags: "{{ (item.tags | default([])) + [item.release_id] | default(omit) }}"
+    properties: "{{ item.properties | default(omit) }}"
+  loop: "{{ images }}"
   loop_control:
-    label: "{{ image_path | default('N/A') }}"
-  when: item.json is defined
-  vars:
-    image_url: "{{ item.json.image_status.upload_status.options.url }}"
-    image_path: "{{ storage_dir | default('.') }}/{{ item.json.request.image_name }}-{{ release_id }}.qcow2"
-  async: 600
-  poll: 0
-  register: download
-
-- name: Confirm image download completed
-  ansible.builtin.async_status:
-    jid: "{{ item.ansible_job_id }}"
-  register: job_result
-  until: job_result.finished
-  retries: 10
-  delay: 60
-  loop: "{{ download.results }}"
-  loop_control:
-    label: "{{ item.item.json.request.image_name }}"
+    label: "{{ item.name }}"

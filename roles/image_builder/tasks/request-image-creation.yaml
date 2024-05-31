@@ -1,10 +1,9 @@
-# TODO
-#- name: Verify compose already exists for this image release
-#  when: not force_create | default(False)
+- name: Request creation of images
+  ansible.builtin.import_role:
+    name: image_builder
+    tasks_from: get-refresh-token
 
 - name: Request creation of images
-  tags:
-    - compose
   ansible.builtin.uri:
     url: "{{ api_endpoint }}/compose"
     method: POST

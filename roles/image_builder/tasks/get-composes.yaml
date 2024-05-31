@@ -1,3 +1,8 @@
+- name: Get refresh token
+  ansible.builtin.import_role:
+    name: image_builder
+    tasks_from: get-refresh-token
+
 - name: Get available composes
   ansible.builtin.uri:
     url: "{{ api_endpoint }}/composes"
@@ -8,3 +13,26 @@
     status_code: 200
   register: composes
 
+- name: Identify required composes from the list
+  set_fact:
+    composeids: "{{ composeids|default([]) + [ thisitem ] }}"
+  loop: "{{ images | product(composes.json.data) | list }}"
+  loop_control:
+    label: "{{ item[1].id }}"
+  vars:
+    thisitem:
+      json:
+        id: "{{ item[1].id }}"
+      invocation:
+        module_args:
+          body:
+            image_name: "{{ item[1].image_name }}"
+  when:
+    - item[1].image_name is defined
+    - item[1].image_name == item[0].name
+    - item[1].request.image_description == release_id
+
+- name: Set fact with compose_request
+  ansible.builtin.set_fact:
+    compose_request:
+      results: "{{ composeids | default([]) }}"

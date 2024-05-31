@@ -7,7 +7,7 @@
 
   vars_prompt:
     - name: composes
-      prompt: "Enter comma-separated ids of compose to delete:"
+      prompt: "Enter comma-separated ids of compose to delete"
       private: false
 
   tasks:

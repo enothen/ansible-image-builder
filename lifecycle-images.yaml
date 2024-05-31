@@ -5,29 +5,12 @@
   become: False
 
   tasks:
-    - name: Get refresh token
-      tags: 
-        - token
-        - always
+    - name: Check if image exists already
+      tags:
+        - check
       ansible.builtin.import_role:
         name: image_builder
-        tasks_from: get-refresh-token
-
-    - name: Check if image exists
-      ansible.builtin.stat:
-        path: "{{ storage_dir | default('.') }}/{{ item.name }}-{{ item.release_id }}.qcow2"
-      loop: "{{ images }}"
-      loop_control:
-        label: "{{ item.name }}"
-      register: filecheck
-
-    - name:  Show file status
-      debug:
-        msg: "{{ item.stat }}"
-      loop: "{{ filecheck.results }}"
-      loop_control:
-        label: "{{ item.invocation.module_args.path }}"
-      when: not item.stat.exists
+        tasks_from: check-images
 
     - name: Request creation of images
       tags:
@@ -46,21 +29,20 @@
     - name: Run customization tasks on images
       tags:
         - customize
-        - never
       ansible.builtin.import_role:
-        name: qcow_image
-        tasks_from: customize
+        name: image_builder
+        tasks_from: customize-images
 
     - name: Upload images to rhosp
       tags:
         - upload
       ansible.builtin.import_role:
-        name: qcow_image
+        name: image_builder
         tasks_from: upload-to-rhosp
 
     - name: Delete older image versions
       tags:
         - delete
       ansible.builtin.import_role:
-        name: qcow_image
-        tasks_from: delete
+        name: image_builder
+        tasks_from: delete-images
