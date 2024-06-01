@@ -23,18 +23,12 @@ Alternatively,
 ```
 $ git clone https://github.com/enothen/ansible-image-builder
 $ cd ansible-image-builder
-$ source ~/overcloudrc
 ```
 
 2. Create and populate a vault (then put your vault password in a file or provide on the ansible-playbook command line):
 ```
 $ echo 'vault_offline_token: "<your offline token here>"' > group_vars/all/vault
 $ ansible-vault encrypt group_vars/all/vault
-```
-
-3. Then source the overcloud credentials:
-```
-$ source ~/overcloudrc 
 ```
 
 ### lifecycle-images.yaml
@@ -47,9 +41,9 @@ This playbook manages end-to-end lifecycle of a qcow image, from image builder t
 5. Remove the older versions of the images from OpenStack
 
 ```
-$ ansible-playbook lifecycle-images.yaml --skip-tags customize
+$ ansible-playbook lifecycle-images.yaml 
 
-PLAY [This playbook creates qcow2 image(s) using the image-builder service] **************************************
+PLAY [This playbook does a full lifecycle of qcow2 image(s) using the image-builder service] *********************
 
 TASK [image_builder : Check if image exists] *********************************************************************
 ok: [localhost] => (item=rhel-8.4-base-ib)
@@ -57,17 +51,17 @@ ok: [localhost] => (item=rhel-9.2-base-ib)
 ok: [localhost] => (item=rhel-9-lamp-ib)
 
 TASK [image_builder : Show file status] **************************************************************************
-ok: [localhost] => (item=/mnt/persist/images/rhel-8.4-base-ib-rel-20240531v2.qcow2) => {
+ok: [localhost] => (item=/mnt/persist/images/rhel-8.4-base-ib-rel-20240430v2.qcow2) => {
     "msg": {
         "exists": false
     }
 }
-ok: [localhost] => (item=/mnt/persist/images/rhel-9.2-base-ib-rel-20240531v2.qcow2) => {
+ok: [localhost] => (item=/mnt/persist/images/rhel-9.2-base-ib-rel-20240430v2.qcow2) => {
     "msg": {
         "exists": false
     }
 }
-ok: [localhost] => (item=/mnt/persist/images/rhel-9-lamp-ib-rel-20240531v2.qcow2) => {
+ok: [localhost] => (item=/mnt/persist/images/rhel-9-lamp-ib-rel-20240430v2.qcow2) => {
     "msg": {
         "exists": false
     }
@@ -80,21 +74,6 @@ TASK [image_builder : Request creation of images] ******************************
 ok: [localhost] => (item=rhel-8.4-base-ib)
 ok: [localhost] => (item=rhel-9.2-base-ib)
 ok: [localhost] => (item=rhel-9-lamp-ib)
-
-TASK [image_builder : Get refresh_token from offline_token] ******************************************************
-skipping: [localhost]
-
-TASK [image_builder : Get available composes] ********************************************************************
-skipping: [localhost]
-
-TASK [image_builder : Identify required composes from the list] **************************************************
-skipping: [localhost]
-
-TASK [image_builder : Set fact with compose_request] *************************************************************
-skipping: [localhost]
-
-TASK [image_builder : Get refresh_token from offline_token] ******************************************************
-ok: [localhost]
 
 TASK [image_builder : Verify compose request is finished] ********************************************************
 FAILED - RETRYING: [localhost]: Verify compose request is finished (20 retries left).
@@ -110,40 +89,32 @@ FAILED - RETRYING: [localhost]: Verify compose request is finished (11 retries l
 FAILED - RETRYING: [localhost]: Verify compose request is finished (10 retries left).
 ok: [localhost] => (item=rhel-8.4-base-ib: compose_status: success, upload_status: success)
 ok: [localhost] => (item=rhel-9.2-base-ib: compose_status: success, upload_status: success)
-FAILED - RETRYING: [localhost]: Verify compose request is finished (20 retries left).
 ok: [localhost] => (item=rhel-9-lamp-ib: compose_status: success, upload_status: success)
 
 TASK [image_builder : Start images download] *********************************************************************
-changed: [localhost] => (item=/mnt/persist/images/rhel-8.4-base-ib-rel-20240531v2.qcow2)
-changed: [localhost] => (item=/mnt/persist/images/rhel-9.2-base-ib-rel-20240531v2.qcow2)
-changed: [localhost] => (item=/mnt/persist/images/rhel-9-lamp-ib-rel-20240531v2.qcow2)
+changed: [localhost] => (item=/mnt/persist/images/rhel-8.4-base-ib-rel-20240430v2.qcow2)
+changed: [localhost] => (item=/mnt/persist/images/rhel-9.2-base-ib-rel-20240430v2.qcow2)
+changed: [localhost] => (item=/mnt/persist/images/rhel-9-lamp-ib-rel-20240430v2.qcow2)
 
 TASK [image_builder : Confirm image download completed] **********************************************************
 FAILED - RETRYING: [localhost]: Confirm image download completed (10 retries left).
 changed: [localhost] => (item=rhel-8.4-base-ib)
-FAILED - RETRYING: [localhost]: Confirm image download completed (10 retries left).
 changed: [localhost] => (item=rhel-9.2-base-ib)
+FAILED - RETRYING: [localhost]: Confirm image download completed (10 retries left).
+
+
 changed: [localhost] => (item=rhel-9-lamp-ib)
 
-TASK [image_builder : Get refresh_token from offline_token] ******************************************************
-skipping: [localhost]
+TASK [image_builder : Run virt-customize] ************************************************************************
+changed: [localhost] => (item=/mnt/persist/images/rhel-8.4-base-ib-rel-20240430v2.qcow2)
+changed: [localhost] => (item=/mnt/persist/images/rhel-9.2-base-ib-rel-20240430v2.qcow2)
+changed: [localhost] => (item=/mnt/persist/images/rhel-9-lamp-ib-rel-20240430v2.qcow2)
 
-TASK [image_builder : Get available composes] ********************************************************************
-skipping: [localhost]
-
-TASK [image_builder : Identify required composes from the list] **************************************************
-skipping: [localhost]
-
-TASK [image_builder : Set fact with compose_request] *************************************************************
-skipping: [localhost]
-
-TASK [image_builder : Get refresh_token from offline_token] ******************************************************
-ok: [localhost]
-
-TASK [image_builder : Verify compose request is finished] ********************************************************
-ok: [localhost] => (item=rhel-8.4-base-ib: compose_status: success, upload_status: success)
-ok: [localhost] => (item=rhel-9.2-base-ib: compose_status: success, upload_status: success)
-ok: [localhost] => (item=rhel-9-lamp-ib: compose_status: success, upload_status: success)
+TASK [image_builder : Confirm image customization finished] ******************************************************
+FAILED - RETRYING: [localhost]: Confirm image customization finished (30 retries left).
+changed: [localhost] => (item=/mnt/persist/images/rhel-8.4-base-ib-rel-20240430v2.qcow2)
+changed: [localhost] => (item=/mnt/persist/images/rhel-9.2-base-ib-rel-20240430v2.qcow2)
+changed: [localhost] => (item=/mnt/persist/images/rhel-9-lamp-ib-rel-20240430v2.qcow2)
 
 TASK [image_builder : Upload images to rhosp] ********************************************************************
 changed: [localhost] => (item=rhel-8.4-base-ib)
@@ -156,15 +127,15 @@ ok: [localhost] => (item=rhel-9.2-base-ib)
 ok: [localhost] => (item=rhel-9-lamp-ib)
 
 TASK [image_builder : Delete older image versions] ***************************************************************
-skipping: [localhost] => (item=rhel-8.4-base-ib, ca697718-ab68-4f09-a492-e0e3b99ea085) 
-changed: [localhost] => (item=rhel-8.4-base-ib, 2b36ab16-2d52-4a52-8a65-cc8c5f153b71)
-skipping: [localhost] => (item=rhel-9.2-base-ib, cb020874-1986-452a-8b22-ccdb14c9b289) 
-changed: [localhost] => (item=rhel-9.2-base-ib, 04815251-9c84-4789-a85f-b92f2397fc83)
-skipping: [localhost] => (item=rhel-9-lamp-ib, facbaf46-8238-4999-8da0-5f37e25f4b67) 
-changed: [localhost] => (item=rhel-9-lamp-ib, b6306757-7dc8-4a26-bbbf-4ec1f5a3e6a2)
+skipping: [localhost] => (item=rhel-8.4-base-ib, 5f68ace7-cef4-48ba-bf4d-e5ca373c84e2) 
+changed: [localhost] => (item=rhel-8.4-base-ib, ca697718-ab68-4f09-a492-e0e3b99ea085)
+skipping: [localhost] => (item=rhel-9.2-base-ib, b4de77d2-7d10-4664-849d-c977f9bace6a) 
+changed: [localhost] => (item=rhel-9.2-base-ib, cb020874-1986-452a-8b22-ccdb14c9b289)
+skipping: [localhost] => (item=rhel-9-lamp-ib, 0f185046-2c36-4fc0-89cd-9bbe8a6e1e56) 
+changed: [localhost] => (item=rhel-9-lamp-ib, facbaf46-8238-4999-8da0-5f37e25f4b67)
 
 PLAY RECAP *******************************************************************************************************
-localhost                  : ok=13   changed=4    unreachable=0    failed=0    skipped=8    rescued=0    ignored=0
+localhost                  : ok=12   changed=6    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
 ```
 
 ### list-distributions.yaml
