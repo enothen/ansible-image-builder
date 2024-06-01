@@ -5,42 +5,31 @@
   become: False
 
   tasks:
-    - name: Check if image exists already
-      ansible.builtin.import_role:
-        name: image_builder
-        tasks_from: check-images-exist
-
     - name: Get refresh token
       ansible.builtin.import_role:
         name: image_builder
         tasks_from: get-refresh-token
 
-    - name: Request creation of images
+    - name: Get available composes
       ansible.builtin.import_role:
         name: image_builder
-        tasks_from: request-image-creation
+        tasks_from: get-composes
 
     - name: Verify composes finished
       ansible.builtin.import_role:
         name: image_builder
         tasks_from: verify-compose-finished
 
-    - name: Download images
-      ansible.builtin.import_role:
-        name: image_builder
-        tasks_from: download-images
-
-    - name: Run customization tasks
-      ansible.builtin.import_role:
-        name: image_builder
-        tasks_from: customize-images
-
     - name: Upload images to rhosp
+      tags:
+        - upload
       ansible.builtin.import_role:
         name: image_builder
         tasks_from: upload-to-rhosp
 
     - name: Delete older image versions
+      tags:
+        - delete
       ansible.builtin.import_role:
         name: image_builder
         tasks_from: delete-images

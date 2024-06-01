@@ -1,31 +1,3 @@
-- name: Get previous composes
-  ansible.builtin.import_role:
-    name: image_builder
-    tasks_from: get-composes
-  when: compose_request is undefined
-
-- name: Verify compose request is finished
-  ansible.builtin.uri:
-    url: "{{ api_endpoint }}/composes/{{ item.json.id }}"
-    method: GET
-    headers:
-      Authorization: Bearer {{ refresh_token.json.access_token }}
-    status_code: 200
-  loop: "{{ compose_request.results | default([]) }}"
-  loop_control:
-    label: "{{  image_name }}: compose_status: {{ compose_status }}, upload_status: {{ upload_status }}"
-  vars:
-    image_name: "{{ item.invocation.module_args.body.image_name | default('N/A') }}"
-    compose_status: "{{ compose_status_request.json.image_status.status | default(False) }}"
-    upload_status: "{{ compose_status_request.json.image_status.upload_status.status | default(False) }}"
-  register: compose_status_request
-  when: item.json is defined
-  until:
-    - compose_status != "building"
-    - upload_status == "success"
-  retries: 20
-  delay: 60
-
 - name: Start images download
   ansible.builtin.get_url:
     url: "{{ image_url }}"
@@ -44,11 +16,14 @@
 
 - name: Confirm image download completed
   ansible.builtin.async_status:
-    jid: "{{ item.ansible_job_id }}"
+    jid: "{{ jobid }}"
   register: job_result
+  when: jobid
   until: job_result.finished
   retries: 10
   delay: 60
   loop: "{{ download.results }}"
   loop_control:
-    label: "{{ item.item.json.request.image_name }}"
+    label: "{{ item.item.json.request.image_name | default('N/A') }}"
+  vars:
+    jobid: "{{ item.ansible_job_id | default(False) }}"

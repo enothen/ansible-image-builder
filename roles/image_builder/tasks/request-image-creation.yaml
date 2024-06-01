@@ -1,9 +1,4 @@
 - name: Request creation of images
-  ansible.builtin.import_role:
-    name: image_builder
-    tasks_from: get-refresh-token
-
-- name: Request creation of images
   ansible.builtin.uri:
     url: "{{ api_endpoint }}/compose"
     method: POST

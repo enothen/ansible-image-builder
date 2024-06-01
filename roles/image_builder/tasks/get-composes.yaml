@@ -1,8 +1,3 @@
-- name: Get refresh token
-  ansible.builtin.import_role:
-    name: image_builder
-    tasks_from: get-refresh-token
-
 - name: Get available composes
   ansible.builtin.uri:
     url: "{{ api_endpoint }}/composes"
