@@ -29,6 +29,11 @@
         name: image_builder
         tasks_from: verify-compose-finished
 
+    - name: Renew token
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: get-refresh-token
+
     - name: Download images
       ansible.builtin.import_role:
         name: image_builder
