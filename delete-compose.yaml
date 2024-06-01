@@ -1,5 +1,5 @@
 ---
-- name: Playbook to test deleting composes
+- name: Playbook to delete specific composes from Red Hat's image builder service
   hosts: localhost
   connection: local
   become: False

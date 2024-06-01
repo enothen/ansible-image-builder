@@ -1,5 +1,5 @@
 ---
-- name: Playbook to download images
+- name: Playbook to download images from Red Hat's Image Builder sevice
   hosts: localhost
   connection: local
   become: False

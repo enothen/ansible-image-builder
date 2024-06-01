@@ -1,5 +1,5 @@
 ---
-- name: This playbook does a full lifecycle of qcow2 image(s) using the image-builder service
+- name: Playbook to do full lifecycle of qcow2 image(s) using Red Hat's image builder service
   hosts: localhost
   gather_facts: False
   become: False

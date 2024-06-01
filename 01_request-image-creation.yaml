@@ -1,5 +1,5 @@
 ---
-- name: This playbook requests image-builder service to create new qcow2 images
+- name: Playbook to request Red Hat's image builder service to create new qcow2 images
   hosts: localhost
   gather_facts: False
   become: False

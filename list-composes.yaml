@@ -1,5 +1,5 @@
 ---
-- name: Playbook to list available composes in image builder
+- name: Playbook to list available composes in Red Hat's image builder service
   hosts: localhost
   connection: local
   become: False

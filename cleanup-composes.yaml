@@ -1,5 +1,5 @@
 ---
-- name: Playbook to delete old composes from image builder
+- name: Playbook to delete old composes from Red Hat's image builder service
   hosts: localhost
   connection: local
   become: False
