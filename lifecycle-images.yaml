@@ -20,6 +20,10 @@
         name: image_builder
         tasks_from: request-image-creation
 
+    - name: Wait at least five minutes before checking
+      ansible.builtin.pause:
+        minutes: 5
+
     - name: Verify composes finished
       ansible.builtin.import_role:
         name: image_builder
