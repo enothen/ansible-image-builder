@@ -135,7 +135,7 @@ skipping: [localhost] => (item=rhel-9-lamp-ib, 0f185046-2c36-4fc0-89cd-9bbe8a6e1
 changed: [localhost] => (item=rhel-9-lamp-ib, facbaf46-8238-4999-8da0-5f37e25f4b67)
 
 PLAY RECAP *******************************************************************************************************
-localhost                  : ok=12   changed=6    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+localhost                  : ok=12   changed=6    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
 ```
 
 ### list-distributions.yaml
