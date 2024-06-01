@@ -1,0 +1,27 @@
+---
+- name: Playbook to download images
+  hosts: localhost
+  connection: local
+  become: False
+  gather_facts: False
+
+  tasks:
+    - name: Get refresh token
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: get-refresh-token
+
+    - name: Get available composes
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: get-composes
+
+    - name: Verify composes finished
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: verify-compose-finished
+
+    - name: Download images
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: download-images

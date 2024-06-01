@@ -1,62 +1,4 @@
-- name: Block to identify compose ids if undefined
-  when: compose_request is undefined
-  block:
-    - name: Get previous composes
-      ansible.builtin.import_role:
-        name: image_builder
-        tasks_from: get-composes
-
-    - name: Identify required composes from the list
-      set_fact:
-        composeids: "{{ composeids|default([]) + [ thisitem ] }}"
-      loop: "{{ images | product(composes.json.data) | list }}"
-      loop_control:
-        label: "{{ item[1].id }}"
-      vars:
-        thisitem:
-          json:
-            id: "{{ item[1].id }}"
-          invocation:
-            module_args:
-              body:
-                image_name: "{{ item[1].image_name }}"
-      when: 
-        - item[1].image_name is defined
-        - item[1].image_name == item[0].name
-        - item[1].request.image_description == release_id
-
-    - name: Set fact with compose_request
-      ansible.builtin.set_fact:
-        compose_request:
-          results: "{{ composeids | default([]) }}"
-
-- name: Verify compose request is finished
-  tags:
-    - download
-  ansible.builtin.uri:
-    url: "{{ api_endpoint }}/composes/{{ item.json.id }}"
-    method: GET
-    headers:
-      Authorization: Bearer {{ refresh_token.json.access_token }}
-    status_code: 200
-  loop: "{{ compose_request.results | default([]) }}"
-  loop_control:
-    label: "{{  image_name }}: compose_status: {{ compose_status }}, upload_status: {{ upload_status }}"
-  vars:
-    image_name: "{{ item.invocation.module_args.body.image_name | default('N/A') }}"
-    compose_status: "{{ compose_status_request.json.image_status.status | default(False) }}"
-    upload_status: "{{ compose_status_request.json.image_status.upload_status.status | default(False) }}"
-  register: compose_status_request
-  when: item.json is defined
-  until:
-    - compose_status != "building"
-    - upload_status == "success"
-  retries: 20
-  delay: 60
-
-- name: Download images
-  tags:
-    - download
+- name: Start images download
   ansible.builtin.get_url:
     url: "{{ image_url }}"
     dest: "{{ image_path }}"
@@ -68,5 +10,20 @@
   vars:
     image_url: "{{ item.json.image_status.upload_status.options.url }}"
     image_path: "{{ storage_dir | default('.') }}/{{ item.json.request.image_name }}-{{ release_id }}.qcow2"
-  retries: 4
-  delay: 30
+  async: 600
+  poll: 0
+  register: download
+
+- name: Confirm image download completed
+  ansible.builtin.async_status:
+    jid: "{{ jobid }}"
+  register: job_result
+  when: jobid
+  until: job_result.finished
+  retries: 10
+  delay: 60
+  loop: "{{ download.results }}"
+  loop_control:
+    label: "{{ item.item.json.request.image_name | default('N/A') }}"
+  vars:
+    jobid: "{{ item.ansible_job_id | default(False) }}"

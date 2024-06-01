@@ -7,5 +7,5 @@
   tasks:
     - name: Run customization tasks
       ansible.builtin.import_role:
-        name: qcow_image
-        tasks_from: customize
+        name: image_builder
+        tasks_from: customize-images

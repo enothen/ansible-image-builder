@@ -1,0 +1,11 @@
+---
+- name: This playbook does a full lifecycle of qcow2 image(s) using the image-builder service
+  hosts: localhost
+  gather_facts: False
+  become: False
+
+  tasks:
+    - name: Delete older image versions
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: delete-images

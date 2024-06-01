@@ -1,0 +1,21 @@
+---
+- name: This playbook requests image-builder service to create new qcow2 images
+  hosts: localhost
+  gather_facts: False
+  become: False
+
+  tasks:
+    - name: Check if image exists already
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: check-images-exist
+
+    - name: Get refresh token
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: get-refresh-token
+
+    - name: Request creation of images
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: request-image-creation

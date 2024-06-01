@@ -1,0 +1,27 @@
+- name: Run virt-customize
+  ansible.builtin.shell: >
+    virt-customize -a {{ file_name }}
+    --timezone Europe/Berlin
+  loop: "{{ images }}"
+  loop_control:
+    label: "{{ file_name }}"
+  async: 1200
+  poll: 0
+  register: customize
+  vars:
+    file_name: "{{ storage_dir | default('.') }}/{{ item.name }}-{{ release_id }}.qcow2"
+  environment:
+    LIBGUESTFS_BACKEND: direct
+
+- name: Confirm image customization finished
+  ansible.builtin.async_status:
+    jid: "{{ item.ansible_job_id }}"
+  register: job_result
+  until: job_result.finished
+  retries: 30
+  delay: 60
+  loop: "{{ customize.results }}"
+  loop_control:
+    label: "{{ file_name }}"
+  vars:
+    file_name: "{{ storage_dir | default('.') }}/{{ item.item.name }}-{{ release_id }}.qcow2"

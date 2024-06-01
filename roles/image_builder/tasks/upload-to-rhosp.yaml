@@ -1,6 +1,4 @@
 - name: Upload images to rhosp
-  tags:
-    - upload
   openstack.cloud.image:
     name: "{{ item.name }}"
     id: "{{ (compose_status_request.results | selectattr('json.request.image_name', 'match', item.name) | map(attribute='item.json.id') | first) | default(omit) }}"
