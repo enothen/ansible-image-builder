@@ -1,5 +1,5 @@
 # Image definitions
-release_id: "rel-20240604v3"
+release_id: "rel-20240607v1"
 storage_dir: /mnt/persist/images
 
 filesystems:

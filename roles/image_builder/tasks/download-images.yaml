@@ -1,4 +1,4 @@
-- name: Start images download
+- name: Start image download
   ansible.builtin.get_url:
     url: "{{ image_url }}"
     dest: "{{ image_path }}"
@@ -6,7 +6,10 @@
   loop: "{{ compose_status_request.results }}"
   loop_control:
     label: "{{ image_path | default('N/A') }}"
-  when: item.json is defined
+  when:
+    - item.json is defined
+    - item.json.image_status.status == "success"
+    - item.json.image_status.upload_status.status == "success"
   vars:
     image_url: "{{ item.json.image_status.upload_status.options.url }}"
     image_path: "{{ storage_dir | default('.') }}/{{ item.json.request.image_name }}-{{ release_id }}.qcow2"

@@ -1,17 +1,16 @@
 - name: Run virt-customize
   ansible.builtin.shell: >
-    virt-customize -a {{ file_name }}
+    virt-customize -a {{ item.invocation.module_args.path }}
     --timezone Europe/Berlin
-  loop: "{{ images }}"
+  loop: "{{ filecheck.results }}"
   loop_control:
-    label: "{{ file_name }}"
+    label: "{{ item.invocation.module_args.path }}"
   async: 1200
   poll: 0
   register: customize
-  vars:
-    file_name: "{{ storage_dir | default('.') }}/{{ item.name }}-{{ release_id }}.qcow2"
   environment:
     LIBGUESTFS_BACKEND: direct
+  when: item.stat.exists
 
 - name: Confirm image customization finished
   ansible.builtin.async_status:
@@ -22,6 +21,4 @@
   delay: 60
   loop: "{{ customize.results }}"
   loop_control:
-    label: "{{ file_name }}"
-  vars:
-    file_name: "{{ storage_dir | default('.') }}/{{ item.item.name }}-{{ release_id }}.qcow2"
+    label: "{{ item.item.invocation.module_args.path }}"
