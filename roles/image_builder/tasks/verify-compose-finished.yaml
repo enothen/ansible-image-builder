@@ -21,7 +21,9 @@
       when:
         - item.json is defined
         - not compose_status_request.failed | default(False)
-      until: compose_status != "building"
+      until:
+        - compose_status != "building"
+        - compose_status != "pending"
       retries: "{{ compose_check_retries }}"
       delay: "{{ compose_check_wait_secs }}"
 
