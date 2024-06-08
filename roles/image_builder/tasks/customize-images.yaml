@@ -22,3 +22,4 @@
   loop: "{{ customize.results }}"
   loop_control:
     label: "{{ item.item.invocation.module_args.path }}"
+  when: item.changed
