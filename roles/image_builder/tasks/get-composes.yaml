@@ -25,7 +25,7 @@
   when:
     - item[1].image_name is defined
     - item[1].image_name == item[0].name
-    - item[1].request.image_description == release_id
+    - item[1].request.image_description == item[0].compose.image_description
 
 - name: Set fact with compose_request
   ansible.builtin.set_fact:

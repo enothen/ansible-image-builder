@@ -1,5 +1,5 @@
 # Image definitions
-release_id: "rel-20240607v1"
+release_id: "rel-20240609v2"
 storage_dir: /mnt/persist/images
 
 filesystems:
@@ -33,22 +33,36 @@ packages:
     - php-mysqlnd
 
 images:
+  - name: rhel-8.4-lamp-ib
+    compose:
+      distribution: rhel-84
+      image_description: "{{ release_id }}"
+      customizations:
+        filesystem: "{{ filesystems.base }}"
+        packages: "{{ packages.base }}"
+
   - name: rhel-8.4-base-ib
-    distribution: rhel-84
-    filesystem: "{{ filesystems.base }}"
-    packages: "{{ packages.base }}"
-    release_id: "{{ release_id }}"
+    compose:
+      distribution: rhel-84
+      image_description: "{{ release_id }}"
+      customizations:
+        filesystem: "{{ filesystems.base }}"
+        packages: "{{ packages.base }}"
 
   - name: rhel-9.2-base-ib
-    distribution: rhel-92
-    filesystem: "{{ filesystems.base }}"
-    packages: "{{ packages.base }}"
-    release_id: "{{ release_id }}"
+    compose:
+      distribution: rhel-92
+      image_description: "{{ release_id }}"
+      customizations:
+        filesystem: "{{ filesystems.base }}"
+        packages: "{{ packages.base }}"
 
   - name: rhel-9-lamp-ib
-    distribution: rhel-9
+    compose:
+      distribution: rhel-9
+      image_description: "{{ release_id }}"
+      customizations:
+        filesystem: "{{ filesystems.base }} + {{ filesystems.lamp }}"
+        packages: "{{ packages.base }} + {{ packages.lamp }}"
     tags:
       - lamp
-    filesystem: "{{ filesystems.base + filesystems.lamp }}"
-    packages: "{{ packages.base + packages.lamp }}"
-    release_id: "{{ release_id }}"
