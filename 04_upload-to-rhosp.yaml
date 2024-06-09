@@ -5,6 +5,11 @@
   become: False
 
   tasks:
+    - name: Check if image exists already
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: check-images-exist
+
     - name: Get refresh token
       ansible.builtin.import_role:
         name: image_builder
@@ -21,15 +26,6 @@
         tasks_from: verify-compose-finished
 
     - name: Upload images to rhosp
-      tags:
-        - upload
       ansible.builtin.import_role:
         name: image_builder
         tasks_from: upload-to-rhosp
-
-    - name: Delete older image versions
-      tags:
-        - delete
-      ansible.builtin.import_role:
-        name: image_builder
-        tasks_from: delete-images

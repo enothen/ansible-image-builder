@@ -5,6 +5,11 @@
   become: False
 
   tasks:
+    - name: Check if image exists already
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: check-images-exist
+
     - name: Run customization tasks
       ansible.builtin.import_role:
         name: image_builder
