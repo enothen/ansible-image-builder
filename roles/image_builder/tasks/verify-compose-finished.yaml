@@ -31,7 +31,7 @@
     - name: Fail if max attempts tried
       ansible.builtin.fail:
         msg: "Exhausted {{ compose_check_max_loops }} attempts when checking compose request status"
-      when: this_retry == compose_check_max_loops
+      when: this_retry | int == compose_check_max_loops
 
     - name: Renew token
       ansible.builtin.include_tasks: ./get-refresh-token.yaml
