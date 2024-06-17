@@ -1,6 +1,6 @@
 - name: Check if image exists
   ansible.builtin.stat:
-    path: "{{ storage_dir | default('.') }}/{{ item.name }}-{{ item.release_id }}.qcow2"
+    path: "{{ storage_dir | default('.') }}/{{ item.name }}-{{ release_id }}.qcow2"
   loop: "{{ images }}"
   loop_control:
     label: "{{ item.name }}"

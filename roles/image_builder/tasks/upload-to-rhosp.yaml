@@ -6,7 +6,7 @@
     disk_format: "{{ image.disk_format | default('qcow2') }}"
     state: "{{ image.state | default('present') }}"
     filename: "{{ item.invocation.module_args.path }}"
-    tags: "{{ (image.tags | default([])) + [image.release_id] | default(omit) }}"
+    tags: "{{ (image.tags | default([])) + [release_id] | default(omit) }}"
     properties: "{{ image.properties | default(omit) }}"
   loop: "{{ filecheck.results }}"
   loop_control:
