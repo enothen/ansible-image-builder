@@ -4,7 +4,8 @@ A collection of Ansible playbooks to manage lifecycle of qcow2 images using decl
 - [ansible-image-builder](#ansible-image-builder)
   - [Prerequisites](#prerequisites)
   - [Creating image definitions](#creating-image-definitions)
-    - [Customizations](#customizations)
+    - [Image Builder customizations](#image-builder-customizations)
+    - [Offline customizations](#offline-customizations)
     - [Basic example](#basic-example)
   - [Example playbooks](#example-playbooks)
     - [lifecycle-images.yaml](#lifecycle-imagesyaml)
@@ -34,13 +35,19 @@ Create image definitions in yaml, where the `images` variable contains an array 
 
 The schema of the ComposeRequest and Customizations objects, as well as the rest of all possible customizations are defined [here](https://developers.redhat.com/api-catalog/api/image-builder#content-schemas).
 
-### Customizations
+### Image Builder customizations
 There are multiple customization methods available, all of them with their own restrictions. Some examples are:
 
 - **directories**: You can define new directories or directory structures and define the user, password and mode of the directory, as long as the directory's path is under /etc. If you add directories outside of /etc, the image build request is going to be accepted, but the build is going to fail. This is documented [here](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/composing_a_customized_rhel_system_image/creating-system-images-with-composer-command-line-interface_composing-a-customized-rhel-system-image#specifying_customized_directories_in_the_blueprint).
 - **firewall**: Sligthly different to what the `firewall-cmd --add-port` command expects, adding ports to the firewall in image builder is done with the `:` separator, therefore a list of `<port>:<protocol>` is required. This is documented [here](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/composing_a_customized_rhel_system_image/creating-system-images-with-composer-command-line-interface_composing-a-customized-rhel-system-image#customizing-firewall_creating-system-images-with-composer-command-line-interface).
 - **Implicit dependencies**: When adding any customization of type firewall (either ports or services), the firewalld package must also be explicitly added to the list of packages to install, or the image build would fail because the command `firewall-offline-cmd` is not available on the iamge. Idealy, you would also list `firewalld` on the enabled section of the services customization, in order for the service to start at boot. 
 
+### Offline customizations
+It is possible to further customize images after they are downloaded, using the libguestfs virt-customize command. This behavior is disabled by default. To run an offline customization command on any given image, add the key `offline_customization` to the image definition, where the value of the key is the command to run inside the image.
+
+Note that:
+1. The ffline customization task takes a long time to complete, mainly because virt-customize will do an SElinux relabel after the changes. It is much more efficient customizing the image at build time, if there is a schema available for the change you want to make.
+2. Your Ansible Execution Environment needs to have libguestfs-tools installed. You could build an EE on top of the [openstack-tripleoclient](https://catalog.redhat.com/software/containers/rhosp-rhel9/openstack-tripleoclient/63036103354e613c1a11fd66?architecture=amd64&image=6669bf2573d396d1421e447f) image, or just pull my [custom EE](https://quay.io/repository/enothen/rhosp-ee), where I did exactly that.
 
 ### Basic example
 A RHEL 9.2 image that installs Apache, MariaDB and PHP, customizing firewall, services and filesystems:

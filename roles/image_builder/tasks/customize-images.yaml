@@ -1,7 +1,7 @@
 - name: Run virt-customize
   ansible.builtin.shell: >
     virt-customize -a {{ item.invocation.module_args.path }}
-    --timezone Europe/Berlin
+    --run-command '{{ item.item.offline_customization }}'
   loop: "{{ filecheck.results }}"
   loop_control:
     label: "{{ item.invocation.module_args.path }}"
@@ -10,7 +10,9 @@
   register: customize
   environment:
     LIBGUESTFS_BACKEND: direct
-  when: item.stat.exists
+  when:
+    - item.stat.exists
+    - item.item.offline_customization is defined | default(False)
 
 - name: Confirm image customization finished
   ansible.builtin.async_status:
