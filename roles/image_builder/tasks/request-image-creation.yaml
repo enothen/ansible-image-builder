@@ -6,17 +6,15 @@
       Authorization: Bearer {{ refresh_token.json.access_token }}
     body:
       image_name: "{{ image.name }}"
-      image_description: "{{ release_id }}"
-      distribution: "{{ image.distribution }}"
+      image_description: "{{ image.compose.image_description | default(omit) }}"
+      distribution: "{{ image.compose.distribution }}"
+      customizations: "{{ image.compose.customizations | default(omit) }}"
       image_requests:
-        - architecture: "{{ image.architecture | default('x86_64') }}"
-          image_type: "{{ image.image_type | default('guest-image') }}"
+        - architecture: "{{ image.compose.architecture | default('x86_64') }}"
+          image_type: "{{ image.compose.image_type | default('guest-image') }}"
           upload_request:
             type: "{{ image.upload_type | default('aws.s3') }}"
             options: "{{ image.upload_options | default('{}') }}"
-      customizations:
-        packages: "{{ image.packages | default('[]')}}"
-        filesystem: "{{ image.filesystem | default('[]') }}"
     body_format: json
     status_code: 201
   register: compose_request

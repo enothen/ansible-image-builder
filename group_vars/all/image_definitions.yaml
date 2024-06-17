@@ -1,5 +1,5 @@
 # Image definitions
-release_id: "rel-20240607v1"
+release_id: "rel-20240617v1"
 storage_dir: /mnt/persist/images
 
 filesystems:
@@ -26,6 +26,7 @@ packages:
     - sysstat
     - ipa-client
     - openscap-scanner
+    - firewalld
   lamp:
     - httpd
     - mariadb-server
@@ -33,22 +34,82 @@ packages:
     - php-mysqlnd
 
 images:
-  - name: rhel-8.4-base-ib
-    distribution: rhel-84
-    filesystem: "{{ filesystems.base }}"
-    packages: "{{ packages.base }}"
-    release_id: "{{ release_id }}"
-
-  - name: rhel-9.2-base-ib
-    distribution: rhel-92
-    filesystem: "{{ filesystems.base }}"
-    packages: "{{ packages.base }}"
-    release_id: "{{ release_id }}"
-
   - name: rhel-9-lamp-ib
-    distribution: rhel-9
+    compose:
+      distribution: rhel-9
+      image_description: "LAMP on RHEL 9.latest - {{ release_id }}"
+      customizations:
+        filesystem: "{{ filesystems.base + filesystems.lamp }}"
+        packages: "{{ packages.base + packages.lamp }}"
+        files:
+          - path: /etc/sudoers.d/dbas
+            mode: '0600'
+            user: root
+            group: root
+            data: |
+              # Sudo rules for database administrators
+              %dbas ALL= /usr/bin/systemctl start mysqld.service
+              %dbas ALL= /usr/bin/systemctl stop mysqld.service
+              %dbas ALL= /usr/bin/systemctl restart mysqld.service
+              %dbas ALL= /usr/bin/systemctl reload mysqld.service
+        firewall:
+          ports:
+            - '8080:tcp'
+          services:
+            enabled:
+              - ssh
+              - http
+              - https
+        groups:
+          - name: dbas
+            gid: 1002
+        services:
+          enabled:
+            - firewalld
+            - httpd
+            - mariadb
     tags:
       - lamp
-    filesystem: "{{ filesystems.base + filesystems.lamp }}"
-    packages: "{{ packages.base + packages.lamp }}"
-    release_id: "{{ release_id }}"
+
+  - name: rhel-8-base-ib
+    compose:
+      distribution: rhel-8
+      image_description: "RHEL 8.latest - {{ release_id }}"
+      customizations:
+        filesystem: "{{ filesystems.base }}"
+        packages: "{{ packages.base }}"
+        locale:
+          keyboard: gb
+          languages:
+            - en_GB.UTF-8
+
+  - name: rhel-8.4-hardened-ib
+    compose:
+      distribution: rhel-84
+      image_description: "Hardened RHEL 8.4 image with OSCAP profile enabled - {{ release_id }}"
+      customizations:
+        filesystem: "{{ filesystems.base }}"
+        packages: "{{ packages.base }}"
+        fips:
+          enabled: True
+        firewall:
+          services:
+            enabled:
+              - ssh
+        kernel:
+          append: "audit_backlog_limit=8192 audit=1 net.naming-scheme=rhel-8.4"
+        openscap:
+          profile_id: xccdf_org.ssgproject.content_profile_cis
+        services:
+          enabled:
+            - crond
+            - firewalld
+            - systemd-journald
+            - rsyslog
+            - auditd
+          masked:
+            - nfs-server
+            - rpcbind
+            - autofs
+            - bluetooth
+            - nftables
