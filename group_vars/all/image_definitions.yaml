@@ -1,5 +1,5 @@
 # Image definitions
-release_id: "rel-20240617v1"
+release_id: "rel-20240617v2"
 storage_dir: /mnt/persist/images
 
 filesystems:
@@ -72,6 +72,7 @@ images:
       - lamp
 
   - name: rhel-8-base-ib
+    offline_customization: 'sed -i "s/^#\s\{0,\}\(PermitRootLogin\).*/\1 yes/" /etc/ssh/sshd_config'
     compose:
       distribution: rhel-8
       image_description: "RHEL 8.latest - {{ release_id }}"
