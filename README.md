@@ -1,25 +1,106 @@
 # ansible-image-builder
-A collection of Ansible playbooks to manage lifecycle of qcow2 images in OpenStack using [Red Hat's Image Builder SaaS](https://console.redhat.com/insights/image-builder).
+A collection of Ansible playbooks to manage lifecycle of qcow2 images using declarative image definitions.
 
-The definitions of the available Image Builder API methods are [here](https://developers.redhat.com/api-catalog/api/image-builder).
+These playbooks use the API interface of Red Hat's Image Builder SaaS [[0](https://console.redhat.com/insights/image-builder)], which you can find here [[1](https://developers.redhat.com/api-catalog/api/image-builder)].
+
+
+- [ansible-image-builder](#ansible-image-builder)
+  - [Prerequisites](#prerequisites)
+  - [Creating image definitions](#creating-image-definitions)
+    - [Customizations](#customizations)
+    - [Basic example](#basic-example)
+  - [Example playbooks](#example-playbooks)
+    - [lifecycle-images.yaml](#lifecycle-imagesyaml)
+    - [list-distributions.yaml](#list-distributionsyaml)
+    - [list-composes.yaml](#list-composesyaml)
+    - [cleanup-composes.yaml](#cleanup-composesyaml)
+
 
 ## Prerequisites
+To use this Ansible role and run the playbooks in this repository you need:
 1. A user account on Red Hat's customer portal
 2. An offline token, which you can generate [here](https://access.redhat.com/management/api)
 3. Somewhere to run ansible-playbooks, such as Ansible Automation Platform
-4. An OpenStack platform where to upload and rotate the images
-5. Optionally, somewhere to store the images persistently before uploading to OpenStack
+4. A private cloud (such as OpenStack) or virtualization platform (such as RHV) where to upload and rotate the images
+
+## Creating image definitions
+Create image definitions in yaml, where the `images` variable contains an array of images to manage. Each of the entries is a dictionary with the following format:
+
+```
+  - name: String (max 100 char, required)
+    tags: Array<String>
+    compose: Object<ComposeRequest>
+      distribution: String, limited to specific options
+      image_description: String (max 250 char)
+      customizations: Object<Customizations>
+```
+
+The schema of the ComposeRequest and Customizations objects, as well as the rest of all possible customizations are defined [here](https://developers.redhat.com/api-catalog/api/image-builder#schema-ComposeRequest).
+
+### Customizations
+There are multiple customization methods available, all of them with their own restrictions. Some examples are:
+
+- **directories**: You can define new directories or directory structures and define the user, password and mode of the directory, as long as the directory's path is under /etc. If you add directories outside of /etc, the image build request is going to be accepted, but the build is going to fail. This is documented [here](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/composing_a_customized_rhel_system_image/creating-system-images-with-composer-command-line-interface_composing-a-customized-rhel-system-image#specifying_customized_directories_in_the_blueprint)
+- **firewall**: Sligthly different to what the `firewall-cmd --add-port` command expects, adding ports to the firewall in image builder is done with the `:` separator, therefore a list of `<port>:<protocol>` is required. This is documented [here](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/composing_a_customized_rhel_system_image/creating-system-images-with-composer-command-line-interface_composing-a-customized-rhel-system-image#customizing-firewall_creating-system-images-with-composer-command-line-interface)
+- **Implicit dependencies**: When adding any customization of type firewall (either ports or services), the firewalld package must also be explicitly added to the list of packages to install, or the image build would fail because the command `firewall-offline-cmd` is not available on the iamge. Idealy, you would also list `firewalld` on the enabled section of the services customization, in order for the service to start at boot. 
+
+
+### Basic example
+A RHEL 9.2 image that installs Apache, MariaDB and PHP, customizing firewall, services and filesystems:
+```
+images:
+  - name: rhel-9.2-lamp
+    compose:
+      distribution: rhel-92
+      image_description: "RHEL 9.2 with Apache, MariaDB and PHP"
+      customizations:
+        files:
+          - path: /etc/sudoers.d/dbagroup
+            mode: '0600'
+            user: root
+            group: root
+            data: |
+              # Sudo rules for database administrators
+              %dbas ALL= /usr/bin/systemctl start mysqld.service
+              %dbas ALL= /usr/bin/systemctl stop mysqld.service
+              %dbas ALL= /usr/bin/systemctl restart mysqld.service
+              %dbas ALL= /usr/bin/systemctl reload mysqld.service
+        firewall:
+          services:
+            enabled:
+              - ssh
+              - http
+              - https
+        filesystems:
+          - mountpoint: /var/www/html
+            min_size: 2048
+          - mountpoint: /var/lib/mysql
+            min_size: 2048
+        packages:
+          - httpd
+          - mariadb-server
+          - php
+          - php-mysqlnd
+        services:
+          enabled:
+            - firewalld
+            - httpd
+            - mariadb
+```
+
+See more examples in [this file](group_vars/all/image_definitions.yaml).
 
 ## Example playbooks
 The playbooks mentioned in the following examples use the image definitions in `group_vars/all/image_definitions.yaml` to create or delete images. No image will be created, uploaded or delete if the name doesn't match the definitions.
 When deleting composes from image builder, only those with an `image_name` matching the definitions will be deleted. The rest will be ignored.
 
-It is recommended to setup these playbooks as templates in Ansible Automation Platform. Each of them require:
-1. A vault with your `vault_offline_token` (and therefore a credential of type vault with the password) 
-2. A credential of [type OpenStack](https://access.redhat.com/documentation/en-us/red_hat_ansible_automation_platform/2.4/html/automation_controller_user_guide/controller-credentials#ref-controller-credential-openstack) with all required details where to upload the images (Keystone url, user, password, etc.)
+It is recommended to setup these playbooks as templates in Ansible Automation Platform. At a minimum,. they require a vault with your `vault_offline_token` (and therefore a credential of type vault with the password).
 
-Alternatively, 
-1. clone this repository to your undercloud server:
+Optionally, if uploading images to OpenStack, a credential of [type OpenStack](https://access.redhat.com/documentation/en-us/red_hat_ansible_automation_platform/2.4/html/automation_controller_user_guide/controller-credentials#ref-controller-credential-openstack) is needed. This provies all details required to upload the images, such as Keystone url, user, password, etc.
+
+Alternatively:
+
+1. clone this repository to your Ansible server of choice:
 ```
 $ git clone https://github.com/enothen/ansible-image-builder
 $ cd ansible-image-builder
@@ -29,6 +110,13 @@ $ cd ansible-image-builder
 ```
 $ echo 'vault_offline_token: "<your offline token here>"' > group_vars/all/vault
 $ ansible-vault encrypt group_vars/all/vault
+```
+
+3. If uploading images to OpenStack, install the `python3-openstackclient` (eg: in a venv)
+```
+$ python3 -m venv ~/venvs/ImageBuilder
+$ source ~/venvs/ImageBuilder/bin/activate
+$ pip install --upgrade pip python-openstackclient
 ```
 
 ### lifecycle-images.yaml
