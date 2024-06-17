@@ -1,8 +1,5 @@
 # ansible-image-builder
-A collection of Ansible playbooks to manage lifecycle of qcow2 images using declarative image definitions.
-
-These playbooks use the API interface of Red Hat's Image Builder SaaS [[0](https://console.redhat.com/insights/image-builder)], which you can find here [[1](https://developers.redhat.com/api-catalog/api/image-builder)].
-
+A collection of Ansible playbooks to manage lifecycle of qcow2 images using declarative image definitions, using the [API interface](https://developers.redhat.com/api-catalog/api/image-builder) of Red Hat's [Image Builder SaaS](https://console.redhat.com/insights/image-builder).
 
 - [ansible-image-builder](#ansible-image-builder)
   - [Prerequisites](#prerequisites)
@@ -35,13 +32,13 @@ Create image definitions in yaml, where the `images` variable contains an array 
       customizations: Object<Customizations>
 ```
 
-The schema of the ComposeRequest and Customizations objects, as well as the rest of all possible customizations are defined [here](https://developers.redhat.com/api-catalog/api/image-builder#schema-ComposeRequest).
+The schema of the ComposeRequest and Customizations objects, as well as the rest of all possible customizations are defined [here](https://developers.redhat.com/api-catalog/api/image-builder#content-schemas).
 
 ### Customizations
 There are multiple customization methods available, all of them with their own restrictions. Some examples are:
 
-- **directories**: You can define new directories or directory structures and define the user, password and mode of the directory, as long as the directory's path is under /etc. If you add directories outside of /etc, the image build request is going to be accepted, but the build is going to fail. This is documented [here](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/composing_a_customized_rhel_system_image/creating-system-images-with-composer-command-line-interface_composing-a-customized-rhel-system-image#specifying_customized_directories_in_the_blueprint)
-- **firewall**: Sligthly different to what the `firewall-cmd --add-port` command expects, adding ports to the firewall in image builder is done with the `:` separator, therefore a list of `<port>:<protocol>` is required. This is documented [here](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/composing_a_customized_rhel_system_image/creating-system-images-with-composer-command-line-interface_composing-a-customized-rhel-system-image#customizing-firewall_creating-system-images-with-composer-command-line-interface)
+- **directories**: You can define new directories or directory structures and define the user, password and mode of the directory, as long as the directory's path is under /etc. If you add directories outside of /etc, the image build request is going to be accepted, but the build is going to fail. This is documented [here](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/composing_a_customized_rhel_system_image/creating-system-images-with-composer-command-line-interface_composing-a-customized-rhel-system-image#specifying_customized_directories_in_the_blueprint).
+- **firewall**: Sligthly different to what the `firewall-cmd --add-port` command expects, adding ports to the firewall in image builder is done with the `:` separator, therefore a list of `<port>:<protocol>` is required. This is documented [here](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/composing_a_customized_rhel_system_image/creating-system-images-with-composer-command-line-interface_composing-a-customized-rhel-system-image#customizing-firewall_creating-system-images-with-composer-command-line-interface).
 - **Implicit dependencies**: When adding any customization of type firewall (either ports or services), the firewalld package must also be explicitly added to the list of packages to install, or the image build would fail because the command `firewall-offline-cmd` is not available on the iamge. Idealy, you would also list `firewalld` on the enabled section of the services customization, in order for the service to start at boot. 
 
 
