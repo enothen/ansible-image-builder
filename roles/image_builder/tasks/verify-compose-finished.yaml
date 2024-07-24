@@ -28,6 +28,37 @@
       retries: "{{ compose_check_retries }}"
       delay: "{{ compose_check_wait_secs }}"
 
+    - name: Fail if max attempts tried
+      ansible.builtin.fail:
+        msg: Exhausted {{ compose_check_max_loops }} attempts when checking compose request status
+      when: this_retry | int == compose_check_max_loops
+
+    - name: Renew token
+      ansible.builtin.include_tasks: ./get-refresh-token.yaml
+      when: 401 in compose_status_request.results | map(attribute='status', default='nostatus') | unique
+
+    - name: Get refresh_token from offline_token
+      ansible.builtin.uri:
+        url: "{{ sso_endpoint }}"
+        method: POST
+
+      loop: "{{ compose_request.results | default([]) }}"
+      loop_control:
+        label: "{{  image_name }}: compose_status: {{ compose_status }}, upload_status: {{ upload_status }}"
+      vars:
+        image_name: "{{ item.invocation.module_args.body.image_name | default('NoName') }}"
+        compose_status: "{{ compose_status_request.json.image_status.status | default(false) }}"
+        upload_status: "{{ compose_status_request.json.image_status.upload_status.status | default(false) }}"
+      register: compose_status_request
+      when:
+        - item.json is defined
+        - not compose_status_request.failed | default(false)
+      until:
+        - compose_status != "building"
+        - compose_status != "pending"
+      retries: "{{ compose_check_retries }}"
+      delay: "{{ compose_check_wait_secs }}"
+
   rescue:
     - name: Fail if max attempts tried
       ansible.builtin.fail:
@@ -40,7 +71,7 @@
 
     - name: Unset compose_status_request.failed
       when: compose_status_request.failed
-      set_fact:
+      ansible.builtin.set_fact:
         compose_status_request:
           failed: false
 
