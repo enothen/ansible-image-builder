@@ -1,3 +1,4 @@
+---
 - name: Get available composes
   ansible.builtin.uri:
     url: "{{ api_endpoint }}/composes"
@@ -9,8 +10,6 @@
   register: composes
 
 - name: Identify required composes from the list
-  set_fact:
-    composeids: "{{ composeids|default([]) + [ thisitem ] }}"
   loop: "{{ images | product(composes.json.data) | list }}"
   loop_control:
     label: "{{ item[1].id }}"
@@ -26,6 +25,8 @@
     - item[1].image_name is defined
     - item[1].image_name == item[0].name
     - item[1].request.image_description | default(False) == item[0].compose.image_description | default(False)
+  ansible.builtin.set_fact:
+    composeids: "{{ composeids|default([]) + [ thisitem ] }}"
 
 - name: Set fact with compose_request
   ansible.builtin.set_fact:

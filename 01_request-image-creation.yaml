@@ -1,8 +1,8 @@
 ---
 - name: Playbook to request Red Hat's image builder service to create new qcow2 images
   hosts: localhost
-  gather_facts: False
-  become: False
+  gather_facts: false
+  become: false
 
   tasks:
     - name: Check if image exists already

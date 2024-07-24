@@ -2,17 +2,17 @@
 - name: Playbook to delete specific composes from Red Hat's image builder service
   hosts: localhost
   connection: local
-  become: False
-  gather_facts: False
+  become: false
+  gather_facts: false
 
   vars_prompt:
     - name: composes
-      prompt: "Enter comma-separated ids of compose to delete"
+      prompt: Enter comma-separated ids of compose to delete
       private: false
 
   tasks:
     - name: Create list of compose ids
-      set_fact:
+      ansible.builtin.set_fact:
         composes_list: "{{ composes.split(',') }}"
 
     - name: Get refresh token
@@ -27,5 +27,4 @@
         headers:
           Authorization: Bearer {{ refresh_token.json.access_token }}
           Content-Type: application/json
-        status_code: 200
-      loop: "{{ composes_list }}"
+        status_code: "{{ composes_list }}"

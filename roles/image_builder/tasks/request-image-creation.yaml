@@ -1,3 +1,4 @@
+---
 - name: Request creation of images
   ansible.builtin.uri:
     url: "{{ api_endpoint }}/compose"
@@ -16,9 +17,8 @@
             type: "{{ image.upload_type | default('aws.s3') }}"
             options: "{{ image.upload_options | default('{}') }}"
     body_format: json
-    status_code: 201
+    status_code: "{{ filecheck.results }}"
   register: compose_request
-  loop: "{{ filecheck.results }}"
   loop_control:
     label: "{{ image.name }}"
   vars:

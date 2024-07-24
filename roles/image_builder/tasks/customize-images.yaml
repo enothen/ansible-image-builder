@@ -1,3 +1,4 @@
+---
 - name: Run virt-customize
   ansible.builtin.shell: >
     virt-customize -a {{ item.invocation.module_args.path }}

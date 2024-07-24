@@ -1,8 +1,8 @@
 ---
 - name: Playbook to upload new images versions to OpenStack
   hosts: localhost
-  gather_facts: False
-  become: False
+  gather_facts: false
+  become: false
 
   tasks:
     - name: Check if image exists already
