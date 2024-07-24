@@ -12,7 +12,7 @@
     LIBGUESTFS_BACKEND: direct
   when:
     - item.stat.exists
-    - item.item.offline_customization is defined | default(False)
+    - item.item.offline_customization is defined | default(false)
 
 - name: Confirm image customization finished
   ansible.builtin.async_status:

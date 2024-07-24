@@ -1,8 +1,8 @@
 ---
 - name: Playbook to do full lifecycle of qcow2 image(s) using Red Hat's image builder service
   hosts: localhost
-  gather_facts: False
-  become: False
+  gather_facts: false
+  become: false
 
   tasks:
     - name: Check if image exists already

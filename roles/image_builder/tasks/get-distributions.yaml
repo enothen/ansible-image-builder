@@ -1,3 +1,4 @@
+---
 - name: Get available distributions
   ansible.builtin.uri:
     url: "{{ api_endpoint }}/distributions"

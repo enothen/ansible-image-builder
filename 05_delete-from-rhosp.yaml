@@ -1,8 +1,8 @@
 ---
 - name: Playbook to delete older image versions from OpenStack
   hosts: localhost
-  gather_facts: False
-  become: False
+  gather_facts: false
+  become: false
 
   tasks:
     - name: Delete older image versions

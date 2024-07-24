@@ -1,3 +1,4 @@
+---
 - name: Request creation of images
   ansible.builtin.uri:
     url: "{{ api_endpoint }}/compose"
