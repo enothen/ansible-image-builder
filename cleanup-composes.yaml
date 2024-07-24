@@ -17,8 +17,6 @@
         tasks_from: get-composes
 
     - name: Deleting these composes
-      debug:
-        msg: "{{ item.image_name }}"
       loop: "{{ composes.json.data }}"
       loop_control:
         label: "{{ item.id }}"
@@ -27,6 +25,8 @@
       when:
         - image_name is defined
         - images | selectattr('name', 'match', image_name) | list | length > 0
+      debug:
+        msg: "{{ item.image_name }}"
 
     - name: Delete compose
       ansible.builtin.uri:
