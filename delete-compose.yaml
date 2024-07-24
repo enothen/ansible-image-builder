@@ -2,8 +2,8 @@
 - name: Playbook to delete specific composes from Red Hat's image builder service
   hosts: localhost
   connection: local
-  become: False
-  gather_facts: False
+  become: false
+  gather_facts: false
 
   vars_prompt:
     - name: composes

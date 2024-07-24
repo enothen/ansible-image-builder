@@ -2,8 +2,8 @@
 - name: Playbook to download images from Red Hat's Image Builder sevice
   hosts: localhost
   connection: local
-  become: False
-  gather_facts: False
+  become: false
+  gather_facts: false
 
   tasks:
     - name: Get refresh token

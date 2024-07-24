@@ -1,8 +1,9 @@
+---
 - name: Start image download
   ansible.builtin.get_url:
     url: "{{ image_url }}"
     dest: "{{ image_path }}"
-    mode: '0644'
+    mode: "0644"
   loop: "{{ compose_status_request.results }}"
   loop_control:
     label: "{{ image_path | default('N/A') }}"
@@ -29,4 +30,4 @@
   loop_control:
     label: "{{ item.item.json.request.image_name | default('N/A') }}"
   vars:
-    jobid: "{{ item.ansible_job_id | default(False) }}"
+    jobid: "{{ item.ansible_job_id | default(false) }}"

@@ -2,8 +2,8 @@
 - name: Playbook to delete old composes from Red Hat's image builder service
   hosts: localhost
   connection: local
-  become: False
-  gather_facts: False
+  become: false
+  gather_facts: false
 
   tasks:
     - name: Get refresh token
@@ -24,7 +24,7 @@
         label: "{{ item.id }}"
       vars:
         image_name: "{{ item.image_name | default(omit) }}"
-      when: 
+      when:
         - image_name is defined
         - images | selectattr('name', 'match', image_name) | list | length > 0
 
@@ -41,6 +41,6 @@
         label: "{{ item.id }}"
       vars:
         image_name: "{{ item.image_name | default(omit) }}"
-      when: 
+      when:
         - image_name is defined
         - images | selectattr('name', 'match', image_name) | list | length > 0

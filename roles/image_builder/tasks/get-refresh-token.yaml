@@ -1,3 +1,4 @@
+---
 - name: Get refresh_token from offline_token
   ansible.builtin.uri:
     url: "{{ sso_endpoint }}"

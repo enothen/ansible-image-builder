@@ -1,3 +1,4 @@
+---
 - name: Check if image exists
   ansible.builtin.stat:
     path: "{{ storage_dir | default('.') }}/{{ item.name }}-{{ release_id }}.qcow2"
@@ -7,9 +8,9 @@
   register: filecheck
 
 - name:  Show file status
-  debug:
-    msg: "{{ item.stat }}"
   loop: "{{ filecheck.results }}"
   loop_control:
     label: "{{ item.invocation.module_args.path }}"
   when: not item.stat.exists
+  debug:
+    msg: "{{ item.stat }}"
