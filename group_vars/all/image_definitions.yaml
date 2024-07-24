@@ -1,3 +1,4 @@
+---
 # Image definitions
 release_id: rel-20240617v2
 storage_dir: /mnt/persist/images
@@ -43,7 +44,7 @@ images:
         packages: "{{ packages.base + packages.lamp }}"
         files:
           - path: /etc/sudoers.d/dbas
-            mode: '0600'
+            mode: "0600"
             user: root
             group: root
             data: |
@@ -54,7 +55,7 @@ images:
               %dbas ALL= /usr/bin/systemctl reload mysqld.service
         firewall:
           ports:
-            - '8080:tcp'
+            - "8080:tcp"
           services:
             enabled:
               - ssh
@@ -72,7 +73,7 @@ images:
       - lamp
 
   - name: rhel-8-base-ib
-    offline_customization: 'sed -i "s/^#\s\{0,\}\(PermitRootLogin\).*/\1 yes/" /etc/ssh/sshd_config'
+    offline_customization: sed -i "s/^#\s\{0,\}\(PermitRootLogin\).*/\1 yes/" /etc/ssh/sshd_config
     compose:
       distribution: rhel-8
       image_description: "RHEL 8.latest - {{ release_id }}"
@@ -92,7 +93,7 @@ images:
         filesystem: "{{ filesystems.base }}"
         packages: "{{ packages.base }}"
         fips:
-          enabled: True
+          enabled: true
         firewall:
           services:
             enabled:

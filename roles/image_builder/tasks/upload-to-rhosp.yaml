@@ -1,7 +1,9 @@
+---
 - name: Upload images to rhosp
   openstack.cloud.image:
     name: "{{ image.name }}"
-    id: "{{ (compose_status_request.results | selectattr('json.request.image_name', 'match', image.name) | map(attribute='item.json.id') | first) | default(omit) }}"
+    id: "{{ (compose_status_request.results | selectattr('json.request.image_name', 'match', image.name) | map(attribute='item.json.id') | first) | default(omit) 
+      }}"
     container_format: "{{ image.container_format | default('bare') }}"
     disk_format: "{{ image.disk_format | default('qcow2') }}"
     state: "{{ image.state | default('present') }}"
