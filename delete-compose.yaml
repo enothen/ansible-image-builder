@@ -27,5 +27,4 @@
         headers:
           Authorization: Bearer {{ refresh_token.json.access_token }}
           Content-Type: application/json
-        status_code: 200
-      loop: "{{ composes_list }}"
+        status_code: "{{ composes_list }}"
