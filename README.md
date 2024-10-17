@@ -46,8 +46,8 @@ There are multiple customization methods available, all of them with their own r
 It is possible to further customize images after they are downloaded, using the libguestfs virt-customize command. This behavior is disabled by default. To run an offline customization command on any given image, add the key `offline_customization` to the image definition, where the value of the key is the command to run inside the image.
 
 Note that:
-1. The ffline customization task takes a long time to complete, mainly because virt-customize will do an SElinux relabel after the changes. It is much more efficient customizing the image at build time, if there is a schema available for the change you want to make.
-2. Your Ansible Execution Environment needs to have libguestfs-tools installed. You could build an EE on top of the [openstack-tripleoclient](https://catalog.redhat.com/software/containers/rhosp-rhel9/openstack-tripleoclient/63036103354e613c1a11fd66?architecture=amd64&image=6669bf2573d396d1421e447f) image, or just pull my [custom EE](https://quay.io/repository/enothen/rhosp-ee), where I did exactly that.
+1. The offline customization task takes a long time to complete, mainly because virt-customize will do an SElinux relabel after the changes. It is much more efficient customizing the image at build time, if there is a schema available for the change you want to make.
+2. Your Ansible Execution Environment needs to have libguestfs-tools installed. You could do so by creating your own EE and include this rpm on the image.
 
 ### Basic example
 A RHEL 9.2 image that installs Apache, MariaDB and PHP, customizing firewall, services and filesystems:

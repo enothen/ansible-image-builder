@@ -1,6 +1,5 @@
 ---
 # Image definitions
-release_id: rel-20240617v2
 storage_dir: /mnt/persist/images
 
 filesystems:
@@ -38,7 +37,7 @@ images:
   - name: rhel-9-lamp-ib
     compose:
       distribution: rhel-9
-      image_description: "LAMP on RHEL 9.latest - {{ release_id }}"
+      image_description: "LAMP on RHEL 9.latest"
       customizations:
         filesystem: "{{ filesystems.base + filesystems.lamp }}"
         packages: "{{ packages.base + packages.lamp }}"
@@ -76,7 +75,7 @@ images:
     offline_customization: sed -i "s/^#\s\{0,\}\(PermitRootLogin\).*/\1 yes/" /etc/ssh/sshd_config
     compose:
       distribution: rhel-8
-      image_description: "RHEL 8.latest - {{ release_id }}"
+      image_description: "RHEL 8.latest"
       customizations:
         filesystem: "{{ filesystems.base }}"
         packages: "{{ packages.base }}"
@@ -88,7 +87,7 @@ images:
   - name: rhel-8.4-hardened-ib
     compose:
       distribution: rhel-84
-      image_description: "Hardened RHEL 8.4 image with OSCAP profile enabled - {{ release_id }}"
+      image_description: "Hardened RHEL 8.4 image with OSCAP profile enabled"
       customizations:
         filesystem: "{{ filesystems.base }}"
         packages: "{{ packages.base }}"
