@@ -25,7 +25,7 @@
       when:
         - image_name is defined
         - images | selectattr('name', 'match', image_name) | list | length > 0
-      debug:
+      ansible.builtin.debug:
         msg: "{{ item.image_name }}"
 
     - name: Delete compose

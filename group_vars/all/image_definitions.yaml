@@ -38,7 +38,7 @@ images:
   - name: rhel-9-lamp-ib
     compose:
       distribution: rhel-9
-      image_description: "LAMP on RHEL 9.latest - {{ release_id }}"
+      image_description: LAMP on RHEL 9.latest - {{ release_id }}
       customizations:
         filesystem: "{{ filesystems.base + filesystems.lamp }}"
         packages: "{{ packages.base + packages.lamp }}"
@@ -55,7 +55,7 @@ images:
               %dbas ALL= /usr/bin/systemctl reload mysqld.service
         firewall:
           ports:
-            - "8080:tcp"
+            - 8080:tcp
           services:
             enabled:
               - ssh
@@ -76,7 +76,7 @@ images:
     offline_customization: sed -i "s/^#\s\{0,\}\(PermitRootLogin\).*/\1 yes/" /etc/ssh/sshd_config
     compose:
       distribution: rhel-8
-      image_description: "RHEL 8.latest - {{ release_id }}"
+      image_description: RHEL 8.latest - {{ release_id }}
       customizations:
         filesystem: "{{ filesystems.base }}"
         packages: "{{ packages.base }}"
@@ -88,7 +88,7 @@ images:
   - name: rhel-8.4-hardened-ib
     compose:
       distribution: rhel-84
-      image_description: "Hardened RHEL 8.4 image with OSCAP profile enabled - {{ release_id }}"
+      image_description: Hardened RHEL 8.4 image with OSCAP profile enabled - {{ release_id }}
       customizations:
         filesystem: "{{ filesystems.base }}"
         packages: "{{ packages.base }}"
@@ -99,7 +99,7 @@ images:
             enabled:
               - ssh
         kernel:
-          append: "audit_backlog_limit=8192 audit=1 net.naming-scheme=rhel-8.4"
+          append: audit_backlog_limit=8192 audit=1 net.naming-scheme=rhel-8.4
         openscap:
           profile_id: xccdf_org.ssgproject.content_profile_cis
         services:
