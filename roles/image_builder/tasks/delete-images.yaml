@@ -13,7 +13,8 @@
     name: "{{ id }}"
     state: absent
   vars:
-    tags_release: "{{ item.0.item.tags | default([]) + [release_id] }}"
+    release_list: "{{ [ release_id | default([]) ] | flatten }}"
+    tags_release: "{{ item.0.item.tags | default([]) + release_list }}"
     tags_current: "{{ item.1.tags }}"
     id: "{{ item.1.id }}"
   when: tags_release | sort != tags_current | sort

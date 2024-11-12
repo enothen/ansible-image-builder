@@ -1,10 +1,17 @@
 ---
+- name: Set fact with release_str if release_id is set
+  ansible.builtin.set_fact:
+    release_str: "-{{ release_id }}"
+  when: release_id is defined
+
 - name: Check if image exists
   ansible.builtin.stat:
-    path: "{{ storage_dir | default('.') }}/{{ item.name }}-{{ release_id }}.qcow2"
+    path: "{{ path }}"
   loop: "{{ images }}"
   loop_control:
-    label: "{{ item.name }}"
+    label: "{{ path }}"
+  vars:
+    path: "{{ storage_dir | default('.') }}/{{ item.name }}{{ release_str | default('') }}.qcow2"
   register: filecheck
 
 - name: Show file status
