@@ -1,4 +1,9 @@
 ---
+- name: Set fact with release_str if release_id is set
+  ansible.builtin.set_fact:
+    release_str: "-{{ release_id }}"
+  when: release_id is defined
+
 - name: Start image download
   ansible.builtin.get_url:
     url: "{{ image_url }}"
@@ -13,7 +18,7 @@
     - item.json.image_status.upload_status.status == "success"
   vars:
     image_url: "{{ item.json.image_status.upload_status.options.url }}"
-    image_path: "{{ storage_dir | default('.') }}/{{ item.json.request.image_name }}-{{ release_id }}.qcow2"
+    image_path: "{{ storage_dir | default('.') }}/{{ item.json.request.image_name }}{{ release_str | default('') }}.qcow2"
   async: 600
   poll: 0
   register: download

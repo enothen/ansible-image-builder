@@ -22,6 +22,7 @@
       when:
         - item.json is defined
         - not compose_status_request.failed | default(false)
+        - not compose_status_request.skipped | default(false)
       until:
         - compose_status != "building"
         - compose_status != "pending"
