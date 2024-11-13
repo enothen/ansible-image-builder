@@ -3,7 +3,7 @@
 release_id: "pr{{ awx_webhook_payload.pull_request.number }}"
 
 # Save images in persistent storage configured on the execution environment
-#storage_dir: /mnt/persist/images
+storage_dir: /mnt/persist/images
 
 # Basic structures to reuse between images
 filesystems:
