@@ -1,8 +1,18 @@
 ---
-- name: Playbook to do full lifecycle of qcow2 image(s) using Red Hat's image builder service
+- name: Playbook to do full lifecycle of qcow2 image(s) using Red Hat's Insights Image Builder
   hosts: localhost
   gather_facts: false
   become: false
+
+  pre_tasks:
+    - when: release_id is not defined
+      block:
+      - name: Gather date_time facts
+        ansible.builtin.setup:
+          gather_subset: date_time
+
+      - ansible.builtin.set_fact:
+          release_id: "{{ ansible_facts.date_time.iso8601_basic_short }}"
 
   tasks:
     - name: Check if image exists already

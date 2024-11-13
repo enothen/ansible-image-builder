@@ -1,7 +1,11 @@
 ---
-# Image definitions
+# Set release id to match the pull request information comming from github
+release_id: "pr{{ awx_webhook_payload.pull_request.number }}"
+
+# Save images in persistent storage configured on the execution environment
 storage_dir: /mnt/persist/images
 
+# Basic structures to reuse between images
 filesystems:
   base:
     - mountpoint: /
@@ -33,11 +37,12 @@ packages:
     - php
     - php-mysqlnd
 
+# The actual images definition
 images:
   - name: rhel-9-lamp-ib
     compose:
       distribution: rhel-9
-      image_description: "LAMP on RHEL 9.latest"
+      image_description: LAMP on RHEL 9.latest
       customizations:
         filesystem: "{{ filesystems.base + filesystems.lamp }}"
         packages: "{{ packages.base + packages.lamp }}"
@@ -75,7 +80,7 @@ images:
     offline_customization: sed -i "s/^#\s\{0,\}\(PermitRootLogin\).*/\1 yes/" /etc/ssh/sshd_config
     compose:
       distribution: rhel-8
-      image_description: "RHEL 8.latest"
+      image_description: RHEL 8.latest
       customizations:
         filesystem: "{{ filesystems.base }}"
         packages: "{{ packages.base }}"
@@ -87,7 +92,7 @@ images:
   - name: rhel-8.4-hardened-ib
     compose:
       distribution: rhel-84
-      image_description: "Hardened RHEL 8.4 image with OSCAP profile enabled"
+      image_description: Hardened RHEL 8.4 image with OSCAP profile enabled
       customizations:
         filesystem: "{{ filesystems.base }}"
         packages: "{{ packages.base }}"
