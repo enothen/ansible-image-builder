@@ -4,6 +4,11 @@
       ansible.builtin.set_fact:
         this_retry: "{{ this_retry | default(0) | int + 1 }}"
 
+    - name: Get compose requests ids if undefined
+      ansible.builtin.include_tasks:
+        file: get-composes.yaml
+      when: compose_request is undefined
+
     - name: Verify compose request is finished
       ansible.builtin.uri:
         url: "{{ api_endpoint }}/composes/{{ item.json.id }}"

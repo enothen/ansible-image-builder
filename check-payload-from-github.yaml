@@ -1,0 +1,32 @@
+---
+- name: Playbook to check event information sent by Github
+  hosts: localhost
+  gather_facts: false
+  become: false
+
+  vars:
+    pr_merged_main: False
+
+  tasks:
+    - name: Set fact if this is a PR merged on main branch
+      set_fact:
+        pr_merged_main: True
+      when:
+        - awx_webhook_event_type is defined
+        - awx_webhook_event_type == "pull_request"
+        - awx_webhook_payload['action'] == "closed"
+        - awx_webhook_payload['base']['ref'] == "main"
+
+    - name: Fail if this is any other event
+      fail:
+        msg: "The event is not a pull request merged on the main branch"
+      when: not pr_merged_main
+
+    - name: Information about this release
+      ansible.builtin.debug:
+        msg:
+          - "Title:  {{ awx_webhook_payload.pull_request.title }}"
+          - "Number: {{ awx_webhook_payload.pull_request.number }}"
+          - "User:   {{ awx_webhook_payload.pull_request.login }}"
+          - "Merged: {{ awx_webhook_payload.pull_request.merged_at }}"
+          - "Body:   {{ awx_webhook_payload.pull_request.body }}"
