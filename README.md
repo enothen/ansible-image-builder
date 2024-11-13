@@ -1,12 +1,13 @@
 # ansible-image-builder
-A collection of Ansible playbooks to manage lifecycle of qcow2 images using declarative image definitions, using the [API interface](https://developers.redhat.com/api-catalog/api/image-builder) of Red Hat's [Image Builder SaaS](https://console.redhat.com/insights/image-builder).
+A collection of Ansible playbooks to manage lifecycle of virtualization images using declarative image definitions through the [API interface](https://developers.redhat.com/api-catalog/api/image-builder) of Red Hat's [Insights Image Builder](https://console.redhat.com/insights/image-builder).
 
 - [ansible-image-builder](#ansible-image-builder)
   - [Prerequisites](#prerequisites)
   - [Creating image definitions](#creating-image-definitions)
     - [Image Builder customizations](#image-builder-customizations)
     - [Offline customizations](#offline-customizations)
-    - [Basic example](#basic-example)
+    - [Basic image definition example](#basic-image-definition-example)
+  - [Setting a release id](#setting-a-release-id)
   - [Example playbooks](#example-playbooks)
     - [lifecycle-images.yaml](#lifecycle-imagesyaml)
     - [list-distributions.yaml](#list-distributionsyaml)
@@ -18,8 +19,8 @@ A collection of Ansible playbooks to manage lifecycle of qcow2 images using decl
 To use this Ansible role and run the playbooks in this repository you need:
 1. A user account on Red Hat's customer portal
 2. An offline token, which you can generate [here](https://access.redhat.com/management/api)
-3. Somewhere to run ansible-playbooks, such as Ansible Automation Platform
-4. A private cloud (such as OpenStack) or virtualization platform (such as RHV) where to upload and rotate the images
+3. Somewhere to run ansible-playbooks, such as Ansible Automation Platform or otherwise through command line
+4. Optionally: A private cloud (such as OpenStack) where to upload and rotate the images
 
 ## Creating image definitions
 Create image definitions in yaml, where the `images` variable contains an array of images to manage. Each of the entries is a dictionary with the following format:
@@ -49,7 +50,7 @@ Note that:
 1. The offline customization task takes a long time to complete, mainly because virt-customize will do an SElinux relabel after the changes. It is much more efficient customizing the image at build time, if there is a schema available for the change you want to make.
 2. Your Ansible Execution Environment needs to have libguestfs-tools installed. You could do so by creating your own EE and include this rpm on the image.
 
-### Basic example
+### Basic image definition example
 A RHEL 9.2 image that installs Apache, MariaDB and PHP, customizing firewall, services and filesystems:
 ```
 images:
@@ -94,11 +95,14 @@ images:
 
 See more examples in [this file](group_vars/all/image_definitions.yaml).
 
+## Setting a release id
+The example in this repository uses event information from Github in order to identify the pull request that triggers an image build. If you are running the image lifecycle playbook from command line, unset `release_id` from the images definitions file so that a timestamp is used instead.
+
 ## Example playbooks
 The playbooks mentioned in the following examples use the image definitions in `group_vars/all/image_definitions.yaml` to create or delete images. No image will be created, uploaded or delete if the name doesn't match the definitions.
 When deleting composes from image builder, only those with an `image_name` matching the definitions will be deleted. The rest will be ignored.
 
-It is recommended to setup these playbooks as templates in Ansible Automation Platform. At a minimum,. they require a vault with your `vault_offline_token` (and therefore a credential of type vault with the password).
+It is recommended to setup these playbooks as templates in Ansible Automation Platform. At a minimum, they require a vault with your `vault_offline_token` (and therefore a credential of type vault with the password).
 
 Optionally, if uploading images to OpenStack, a credential of [type OpenStack](https://access.redhat.com/documentation/en-us/red_hat_ansible_automation_platform/2.4/html/automation_controller_user_guide/controller-credentials#ref-controller-credential-openstack) is needed. This provies all details required to upload the images, such as Keystone url, user, password, etc.
 
@@ -124,13 +128,12 @@ $ pip install --upgrade pip python-openstackclient
 ```
 
 ### lifecycle-images.yaml
-This playbook manages end-to-end lifecycle of a qcow image, from image builder to OpenStack. It will:
+This playbook manages end-to-end lifecycle of images, from image builder to OpenStack. It will:
 
-1. Create new images using Red Hat's image builder service
+1. Create new images using Red Hat's Insights Image Builder service
 2. Wait until the creation of images is complete, then download the images.
-3. Customize the image with arbirtrary tasks using `virt-customize`
-4. Upload the images to OpenStack
-5. Remove the older versions of the images from OpenStack
+3. Upload the images to OpenStack
+4. Remove the older versions of the images from OpenStack
 
 ```
 $ ansible-playbook lifecycle-images.yaml 
