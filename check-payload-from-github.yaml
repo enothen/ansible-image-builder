@@ -5,22 +5,22 @@
   become: false
 
   vars:
-    pr_merged_main: False
+    pr_merged_main: false
 
   tasks:
     - name: Set fact if this is a PR merged on main branch
-      set_fact:
-        pr_merged_main: True
       when:
         - awx_webhook_event_type is defined
         - awx_webhook_event_type == "pull_request"
         - awx_webhook_payload['pull_request']['merged'] | bool
         - awx_webhook_payload['pull_request']['base']['ref'] == "main"
+      ansible.builtin.set_fact:
+        pr_merged_main: true
 
     - name: Fail if this is any other event
-      fail:
-        msg: "The event is not a pull request merged on the main branch"
       when: not pr_merged_main
+      ansible.builtin.fail:
+        msg: The event is not a pull request merged on the main branch
 
     - name: Information about this release
       ansible.builtin.debug:
