@@ -7,12 +7,12 @@
   pre_tasks:
     - when: release_id is not defined
       block:
-      - name: Gather date_time facts
-        ansible.builtin.setup:
-          gather_subset: date_time
+        - name: Gather date_time facts
+          ansible.builtin.setup:
+            gather_subset: date_time
 
-      - ansible.builtin.set_fact:
-          release_id: "{{ ansible_facts.date_time.iso8601_basic_short }}"
+        - ansible.builtin.set_fact:
+            release_id: "{{ ansible_facts.date_time.iso8601_basic_short }}"
 
   tasks:
     - name: Check if image exists already
