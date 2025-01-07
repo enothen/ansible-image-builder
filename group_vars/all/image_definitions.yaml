@@ -59,7 +59,7 @@ images:
               %dbas ALL= /usr/bin/systemctl reload mysqld.service
         firewall:
           ports:
-            - "8080:tcp"
+            - 8080:tcp
           services:
             enabled:
               - ssh
@@ -77,7 +77,6 @@ images:
       - lamp
 
   - name: rhel-8-base-ib
-    offline_customization: sed -i "s/^#\s\{0,\}\(PermitRootLogin\).*/\1 yes/" /etc/ssh/sshd_config
     compose:
       distribution: rhel-8
       image_description: RHEL 8.latest
