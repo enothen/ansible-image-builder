@@ -1,7 +1,7 @@
 ---
 # Set release id to match the pull request information comming from github
 release_id: "pr{{ awx_webhook_payload.pull_request.number }}"
-release_date: "2025-01-08"
+release_date: "2024-12-08"
 
 # Save images in persistent storage configured on the execution environment
 storage_dir: /mnt/persist/images
