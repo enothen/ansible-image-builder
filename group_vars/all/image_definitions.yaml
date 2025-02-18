@@ -88,3 +88,34 @@ images:
           keyboard: gb
           languages:
             - en_GB.UTF-8
+
+  - name: rhel-8.4-hardened-ib
+    compose:
+      distribution: rhel-84
+      image_description: Hardened RHEL 8.4 image with OSCAP profile enabled
+      customizations:
+        filesystem: "{{ filesystems.base }}"
+        packages: "{{ packages.base }}"
+        fips:
+          enabled: true
+        firewall:
+          services:
+            enabled:
+              - ssh
+        kernel:
+          append: "audit_backlog_limit=8192 audit=1 net.naming-scheme=rhel-8.4"
+        openscap:
+          profile_id: xccdf_org.ssgproject.content_profile_cis
+        services:
+          enabled:
+            - crond
+            - firewalld
+            - systemd-journald
+            - rsyslog
+            - auditd
+          masked:
+            - nfs-server
+            - rpcbind
+            - autofs
+            - bluetooth
+            - nftables
