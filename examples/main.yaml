@@ -1,0 +1,159 @@
+---
+# 
+# Variables and basic structures to reuse between images
+#
+
+# If using github to trigger build, set release id to match the pull request id
+release_id: "pr{{ awx_webhook_payload.pull_request.number }}"
+# Optionally set a release date
+release_date: "2025-02-12"
+
+# Set path to persistent storage, if set on the AAP execution environment
+storage_dir: /mnt/persist/images
+
+# Custom filesystem list
+filesystems:
+  base:
+    - mountpoint: /
+      min_size: 10240
+    - mountpoint: /tmp
+      min_size: 1024
+    - mountpoint: /var/tmp
+      min_size: 1024
+    - mountpoint: /var/log
+      min_size: 2048
+    - mountpoint: /home
+      min_size: 2048
+  lamp:
+    - mountpoint: /var/www/html
+      min_size: 2048
+    - mountpoint: /var/lib/mysql
+      min_size: 2048
+
+# Custom package lists
+packages:
+  base:
+    - jq
+    - sysstat
+    - ipa-client
+    - openscap-scanner
+    - firewalld
+  lamp:
+    - httpd
+    - mariadb-server
+    - php
+    - php-mysqlnd
+
+#
+# The actual image definitions
+#
+images:
+  # Minimal image definition
+  - name: rhel-9-base-ib
+    compose:
+      distribution: rhel-9
+      image_description: Basic image based on RHEL 9.latest with no customizations
+
+  # Image based on an EUS distribution with hardening cusotmizations
+  - name: rhel-8.4-hardened-ib
+    compose:
+      distribution: rhel-84
+      image_description: Hardened RHEL 8.4 image with OSCAP profile enabled
+      customizations:
+        filesystem: "{{ filesystems.base }}"
+        packages: "{{ packages.base }}"
+        fips:
+          enabled: true
+        firewall:
+          services:
+            enabled:
+              - ssh
+        kernel:
+          append: "audit_backlog_limit=8192 audit=1 net.naming-scheme=rhel-8.4"
+        openscap:
+          profile_id: xccdf_org.ssgproject.content_profile_cis
+        services:
+          enabled:
+            - crond
+            - firewalld
+            - systemd-journald
+            - rsyslog
+            - auditd
+          masked:
+            - nfs-server
+            - rpcbind
+            - autofs
+            - bluetooth
+            - nftables
+
+  # Base image that customizes the locale variables
+  - name: rhel-8-custom-locale-ib
+    compose:
+      distribution: rhel-8
+      image_description: RHEL 8.latest
+      customizations:
+        locale:
+          keyboard: gb
+          languages:
+            - en_GB.UTF-8
+
+  # RHEL 9 image with a LAMP configuration that uses:
+  # - Predefined filesystems and packages
+  # - Tags when uploading the image to RHOSP
+  - name: rhel-9-lamp-ib
+    tags:
+      - lamp
+    compose:
+      distribution: rhel-9
+      image_description: LAMP on RHEL 9.latest
+      customizations:
+        filesystem: "{{ filesystems.base + filesystems.lamp }}"
+        packages: "{{ packages.base + packages.lamp }}"
+        files:
+          - path: /etc/sudoers.d/dbas
+            mode: "0600"
+            user: root
+            group: root
+            data: |
+              # Sudo rules for database administrators
+              %dbas ALL= /usr/bin/systemctl start mysqld.service
+              %dbas ALL= /usr/bin/systemctl stop mysqld.service
+              %dbas ALL= /usr/bin/systemctl restart mysqld.service
+              %dbas ALL= /usr/bin/systemctl reload mysqld.service
+        firewall:
+          ports:
+            - 8080:tcp
+          services:
+            enabled:
+              - ssh
+              - http
+              - https
+        groups:
+          - name: dbas
+            gid: 1002
+        services:
+          enabled:
+            - firewalld
+            - httpd
+            - mariadb
+
+  # RHEL 9.latest ARM 64 image that is shared with an AWS project
+  - name: rhel-9-aarch64-ib
+    upload_type: aws
+    upload_options:
+      share_with_sources:
+        - "123456"
+    compose:
+      architecture: aarch64
+      distribution: rhel-9
+      image_description: RHEL 9.latest aarch64 image shared with an AWS account
+      image_type: aws
+      customizations:
+        filesystems:
+          - mountpoint: /
+            min_size: 10240
+          - mountpoint: /tmp
+            min_size: 1024
+        packages:
+            - jq
+            - sysstat
