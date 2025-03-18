@@ -13,6 +13,7 @@
       image_requests:
         - architecture: "{{ image.compose.architecture | default('x86_64') }}"
           image_type: "{{ image.compose.image_type | default('guest-image') }}"
+          size: "{{ image.compose.size | default(omit) }}"
           upload_request:
             type: "{{ image.upload_type | default('aws.s3') }}"
             options: "{{ image.upload_options | default('{}') }}"

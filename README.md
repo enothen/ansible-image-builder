@@ -13,6 +13,8 @@ A collection of Ansible playbooks to manage lifecycle of virtualization images u
     - [list-distributions.yaml](#list-distributionsyaml)
     - [list-composes.yaml](#list-composesyaml)
     - [cleanup-composes.yaml](#cleanup-composesyaml)
+  - [Known issues and limitations](#known-issues-and-limitations)
+    - [Image definition with custom size](#image-definition-with-custom-size)
 
 
 ## Prerequisites
@@ -615,3 +617,8 @@ skipping: [localhost] => (item=33633066-1fae-4a59-8a83-7580210e02e8)
 PLAY RECAP *******************************************************************************************************
 localhost                  : ok=7    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
 ```
+
+## Known issues and limitations
+### Image definition with custom size
+The [ImageRequest object](https://developers.redhat.com/api-catalog/api/image-builder#schema-ImageRequest) supports specifying the (optional) parameter image size. While setting this parameter in the image definition is supported by ansible-image-builder, it requires `[defaults]/jinja2_native` be set to `True` in ansible.cfg.
+Starting on Ansible Core 2.19, native data types is going to be the default. More details [here](https://github.com/nitzmahone/ansible-documentation/blob/core_data_tagging/docs/docsite/rst/porting_guides/porting_guide_core_2.19.rst#native-jinja-mode-required).
