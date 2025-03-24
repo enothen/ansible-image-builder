@@ -2,7 +2,6 @@
 # Default to empty for clean exit of playbooks. This sould be overridden
 # by the user in group_vars.
 images: []
-
 # Endpoint required to request offline token
 sso_endpoint: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
 
