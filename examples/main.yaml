@@ -4,7 +4,7 @@
 #
 
 # If using github to trigger build, set release id to match the pull request id
-release_id: "pr{{ awx_webhook_payload.pull_request.number }}"
+release_id: pr{{ awx_webhook_payload.pull_request.number }}
 # Optionally set a release date
 release_date: "2025-02-12"
 
@@ -69,7 +69,7 @@ images:
             enabled:
               - ssh
         kernel:
-          append: "audit_backlog_limit=8192 audit=1 net.naming-scheme=rhel-8.4"
+          append: audit_backlog_limit=8192 audit=1 net.naming-scheme=rhel-8.4
         openscap:
           profile_id: xccdf_org.ssgproject.content_profile_cis
         services:
@@ -155,5 +155,5 @@ images:
           - mountpoint: /tmp
             min_size: 1024
         packages:
-            - jq
-            - sysstat
+          - jq
+          - sysstat
