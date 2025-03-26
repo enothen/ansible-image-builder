@@ -1,0 +1,31 @@
+---
+- name: Playbook to show details about a specific compose
+  hosts: localhost
+  connection: local
+  become: false
+  gather_facts: false
+
+  vars_prompt:
+    - name: compose
+      prompt: "Enter id of compose"
+      private: false
+
+  tasks:
+    - name: Get refresh token
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: get-refresh-token
+
+    - name: Get compose details
+      ansible.builtin.uri:
+        url: "{{ api_endpoint }}/composes/{{ compose }}"
+        method: GET
+        headers:
+          Authorization: Bearer {{ refresh_token.json.access_token }}
+          Content-Type: application/json
+        status_code: 200
+      register: compose_details
+
+    - name: Debug compose details
+      ansible.builtin.debug:
+        var: compose_details.json
