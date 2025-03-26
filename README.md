@@ -12,6 +12,7 @@ A collection of Ansible playbooks to manage lifecycle of virtualization images u
     - [lifecycle-images.yaml](#lifecycle-imagesyaml)
     - [list-distributions.yaml](#list-distributionsyaml)
     - [list-composes.yaml](#list-composesyaml)
+    - [get-compose-details.yaml](#get-compose-detailsyaml)
     - [cleanup-composes.yaml](#cleanup-composesyaml)
   - [Known issues and limitations](#known-issues-and-limitations)
     - [Image definition with custom size](#image-definition-with-custom-size)
@@ -409,6 +410,70 @@ ok: [localhost] => (item=id: 33633066-1fae-4a59-8a83-7580210e02e8) => {
         "image_description: RHEL8 image to be used for WSL",
         "distribution: rhel-89"
     ]
+}
+
+PLAY RECAP *******************************************************************************************************
+localhost                  : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+```
+
+### get-compose-details.yaml
+Sometimes you just want to get the details of an existing compose. This is similar to the `Download compose request (json)` option on the web interface, but it shows the output on the screen rather than creating a separate file. Either provide the compose id as extra var, or use the var prompt.
+
+```
+$ ansible-playbook get-compose-details.yaml -e compose=e74eb649-20c9-49fa-80f4-0cc4eeb36ebb
+
+PLAY [Playbook to show details about a specific compose] *********************************************************
+
+TASK [image_builder : Get refresh_token from offline_token] ******************************************************
+ok: [localhost]
+
+TASK [Get compose details] ***************************************************************************************
+ok: [localhost]
+
+TASK [Debug compose details] *************************************************************************************
+ok: [localhost] => {
+    "compose_details.json": {
+        "image_status": {
+            "status": "building"
+        },
+        "request": {
+            "client_id": "api",
+            "customizations": {
+                "filesystem": [
+                    {
+                        "min_size": 1024,
+                        "mountpoint": "/boot"
+                    },
+                    {
+                        "min_size": 10240,
+                        "mountpoint": "/"
+                    }
+                ],
+                "kernel": {
+                    "append": "rd.auto"
+                },
+                "packages": [
+                    "lvm2",
+                    "mdadm",
+                    "tar",
+                    "bzip2"
+                ]
+            },
+            "distribution": "rhel-9",
+            "image_description": "RHEL 9.latest image customized for OCP4 on Hetzner",
+            "image_name": "rhel9-hetzner-ocp4",
+            "image_requests": [
+                {
+                    "architecture": "x86_64",
+                    "image_type": "image-installer",
+                    "upload_request": {
+                        "options": {},
+                        "type": "aws.s3"
+                    }
+                }
+            ]
+        }
+    }
 }
 
 PLAY RECAP *******************************************************************************************************
