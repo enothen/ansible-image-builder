@@ -10,7 +10,7 @@ sso_endpoint: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid
 api_endpoint: https://console.redhat.com/api/image-builder/v1
 
 # Where to copy the images when downloading and customizing
-storage_dir: /tmp
+#storage_dir: .
 
 # How many times to check the status of image builds
 compose_check_retries: 15
