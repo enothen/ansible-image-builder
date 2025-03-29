@@ -1,0 +1,31 @@
+---
+- name: Create and download images at once
+  hosts: localhost
+  gather_facts: false
+  become: false
+
+  tasks:
+    - name: Check if image exists already
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: check-images-exist
+
+    - name: Get refresh token
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: get-refresh-token
+
+    - name: Request creation of images
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: request-image-creation
+
+    - name: Verify composes finished
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: verify-compose-finished
+
+    - name: Download images
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: download-images

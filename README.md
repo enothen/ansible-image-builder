@@ -3,18 +3,21 @@ A collection of Ansible playbooks to manage lifecycle of virtualization images u
 
 - [ansible-image-builder](#ansible-image-builder)
   - [Prerequisites](#prerequisites)
+  - [Configuration](#configuration)
   - [Creating image definitions](#creating-image-definitions)
     - [Image Builder customizations](#image-builder-customizations)
     - [Offline customizations](#offline-customizations)
-    - [Basic image definition example](#basic-image-definition-example)
   - [Setting a release id](#setting-a-release-id)
   - [Example playbooks](#example-playbooks)
-    - [lifecycle-images.yaml](#lifecycle-imagesyaml)
-    - [list-distributions.yaml](#list-distributionsyaml)
-    - [list-composes.yaml](#list-composesyaml)
-    - [get-compose-details.yaml](#get-compose-detailsyaml)
-    - [cleanup-composes.yaml](#cleanup-composesyaml)
-  - [Known issues and limitations](#known-issues-and-limitations)
+    - [Playbooks to run from command line](#playbooks-to-run-from-command-line)
+      - [create-and-download.yaml](#create-and-downloadyaml)
+      - [lifecycle-images.yaml](#lifecycle-imagesyaml)
+      - [list-distributions.yaml](#list-distributionsyaml)
+      - [list-composes.yaml](#list-composesyaml)
+      - [get-compose-details.yaml](#get-compose-detailsyaml)
+      - [cleanup-composes.yaml](#cleanup-composesyaml)
+    - [Playbooks to create a workflow in Ansible Automation Platform](#playbooks-to-create-a-workflow-in-ansible-automation-platform)
+  - [Known issues](#known-issues)
     - [Image definition with custom size](#image-definition-with-custom-size)
 
 
@@ -24,6 +27,26 @@ To use this Ansible role and run the playbooks in this repository you need:
 2. An offline token, which you can generate [here](https://access.redhat.com/management/api)
 3. Somewhere to run ansible-playbooks, such as Ansible Automation Platform or otherwise through command line
 4. Optionally: A private cloud (such as OpenStack) where to upload and rotate the images
+
+## Configuration
+1. clone this repository to your Ansible server of choice:
+```
+$ git clone https://github.com/enothen/ansible-image-builder
+$ cd ansible-image-builder
+```
+
+2. Create and populate a vault (then put your vault password in a file or provide on the ansible-playbook command line):
+```
+$ echo 'vault_offline_token: "<your offline token here>"' > group_vars/all/vault
+$ ansible-vault encrypt group_vars/all/vault
+```
+
+3. If uploading images to OpenStack, install the `python3-openstackclient` (eg: in a venv)
+```
+$ python3 -m venv ~/venvs/ImageBuilder
+$ source ~/venvs/ImageBuilder/bin/activate
+$ pip install --upgrade pip python-openstackclient
+```
 
 ## Creating image definitions
 Create image definitions in yaml, where the `images` variable contains an array of images to manage. Each of the entries is a dictionary with the following format:
@@ -39,22 +62,7 @@ Create image definitions in yaml, where the `images` variable contains an array 
 
 The schema of the ComposeRequest and Customizations objects, as well as the rest of all possible customizations are defined [here](https://developers.redhat.com/api-catalog/api/image-builder#content-schemas).
 
-### Image Builder customizations
-There are multiple customization methods available, all of them with their own restrictions. Some examples are:
-
-- **directories**: You can define new directories or directory structures and define the user, password and mode of the directory, as long as the directory's path is under /etc. If you add directories outside of /etc, the image build request is going to be accepted, but the build is going to fail. This is documented [here](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/composing_a_customized_rhel_system_image/creating-system-images-with-composer-command-line-interface_composing-a-customized-rhel-system-image#specifying_customized_directories_in_the_blueprint).
-- **firewall**: Sligthly different to what the `firewall-cmd --add-port` command expects, adding ports to the firewall in image builder is done with the `:` separator, therefore a list of `<port>:<protocol>` is required. This is documented [here](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/composing_a_customized_rhel_system_image/creating-system-images-with-composer-command-line-interface_composing-a-customized-rhel-system-image#customizing-firewall_creating-system-images-with-composer-command-line-interface).
-- **Implicit dependencies**: When adding any customization of type firewall (either ports or services), the firewalld package must also be explicitly added to the list of packages to install, or the image build would fail because the command `firewall-offline-cmd` is not available on the iamge. Idealy, you would also list `firewalld` on the enabled section of the services customization, in order for the service to start at boot. 
-
-### Offline customizations
-It is possible to further customize images after they are downloaded, using the libguestfs virt-customize command. This behavior is disabled by default. To run an offline customization command on any given image, add the key `offline_customization` to the image definition, where the value of the key is the command to run inside the image.
-
-Note that:
-1. The offline customization task takes a long time to complete, mainly because virt-customize will do an SElinux relabel after the changes. It is much more efficient customizing the image at build time, if there is a schema available for the change you want to make.
-2. Your Ansible Execution Environment needs to have libguestfs-tools installed. You could do so by creating your own EE and include this rpm on the image.
-
-### Basic image definition example
-A RHEL 9.2 image that installs Apache, MariaDB and PHP, customizing firewall, services and filesystems:
+Basic image definition example: a RHEL 9.2 image that installs Apache, MariaDB and PHP, customizing firewall, services and filesystems:
 ```
 images:
   - name: rhel-9.2-lamp
@@ -95,42 +103,96 @@ images:
             - httpd
             - mariadb
 ```
+See more advanced example definitions in [examples/main.yaml](examples/main.yaml).
 
-See more examples in [this file](group_vars/all/image_definitions.yaml).
+### Image Builder customizations
+There are multiple customization methods available, all of them with their own restrictions. Some examples are:
+
+- **filesystems**: ISO and OSTree images don't support filesystems. If you have a customization of type `filesystem` and a type of `edge-installer` or `edge-commit`, the compose request is going to be rejected. See valid image types for Insights Image Builder [here](https://developers.redhat.com/api-catalog/api/image-builder#schema-ImageTypes), and documentation of image types [here](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/composing_a_customized_rhel_system_image/index#specifying-a-custom-filesystem-configuration_creating-system-images-with-composer-command-line-interface).
+- **directories**: You can define new directories or directory structures and define the user, password and mode of the directory, as long as the directory's path is under /etc. If you add directories outside of /etc, the image build request is going to be accepted, but the build is going to fail. This is documented [here](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/composing_a_customized_rhel_system_image/creating-system-images-with-composer-command-line-interface_composing-a-customized-rhel-system-image#specifying_customized_directories_in_the_blueprint).
+- **firewall**: Sligthly different to what the `firewall-cmd --add-port` command expects, adding ports to the firewall in image builder is done with the `:` separator, therefore a list of `<port>:<protocol>` is required. This is documented [here](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/composing_a_customized_rhel_system_image/creating-system-images-with-composer-command-line-interface_composing-a-customized-rhel-system-image#customizing-firewall_creating-system-images-with-composer-command-line-interface).
+- **Implicit dependencies**: When adding any customization of type firewall (either ports or services), the firewalld package must also be explicitly added to the list of packages to install, or the image build would fail because the command `firewall-offline-cmd` is not available on the image. Idealy, you would also list `firewalld` on the enabled section of the services customization, in order for the service to start at boot.
+
+### Offline customizations
+It is possible to further customize images after they are downloaded, using the libguestfs virt-customize command. This behavior is disabled by default. To run an offline customization command on any given image, add the key `offline_customization` to the image definition, where the value of the key is the command to run inside the image.
+
+Note that:
+1. The offline customization task takes a long time to complete, mainly because virt-customize will do an SElinux relabel after the changes. It is much more efficient customizing the image at build time, if there is a schema available for the change you want to make.
+2. Your Ansible Execution Environment needs to have libguestfs-tools installed. You could do so by creating your own EE and include this rpm on the image.
+
 
 ## Setting a release id
 The example in this repository uses event information from Github in order to identify the pull request that triggers an image build. If you are running the image lifecycle playbook from command line, unset `release_id` from the images definitions file so that a timestamp is used instead.
 
 ## Example playbooks
-The playbooks mentioned in the following examples use the image definitions in `group_vars/all/image_definitions.yaml` to create or delete images. No image will be created, uploaded or delete if the name doesn't match the definitions.
+The playbooks in this repository use the variable `images` (list). No image will be created, uploaded or deleted if it's name doesn't match the definitions in yaml.
 When deleting composes from image builder, only those with an `image_name` matching the definitions will be deleted. The rest will be ignored.
 
-It is recommended to setup these playbooks as templates in Ansible Automation Platform. At a minimum, they require a vault with your `vault_offline_token` (and therefore a credential of type vault with the password).
-
-Optionally, if uploading images to OpenStack, a credential of [type OpenStack](https://access.redhat.com/documentation/en-us/red_hat_ansible_automation_platform/2.4/html/automation_controller_user_guide/controller-credentials#ref-controller-credential-openstack) is needed. This provies all details required to upload the images, such as Keystone url, user, password, etc.
-
-Alternatively:
-
-1. clone this repository to your Ansible server of choice:
+### Playbooks to run from command line
+#### create-and-download.yaml
+The easiest and quickest way to request image builds, wait for them to finish and download to current directory (or where defined by `storage_dir`).
 ```
-$ git clone https://github.com/enothen/ansible-image-builder
-$ cd ansible-image-builder
+$ ansible-playbook create-and-download.yaml -e=@/home/enothen/git/hetzner-ocp4/ansible/group_vars/all/image-definition.yaml
+
+PLAY [Simple playbook to create and download images to the local directory] **************************************
+
+TASK [image_builder : Set fact with release_str if release_id is set] ********************************************
+skipping: [localhost]
+
+TASK [image_builder : Check if image exists] *********************************************************************
+ok: [localhost] => (item=./rhel9-hetzner-ocp4.guest-image)
+
+TASK [image_builder : Show file status] **************************************************************************
+ok: [localhost] => (item=./rhel9-hetzner-ocp4.guest-image) => {
+    "msg": {
+        "exists": false
+    }
+}
+
+TASK [image_builder : Get refresh_token from offline_token] ******************************************************
+ok: [localhost]
+
+TASK [image_builder : Request creation of images] ****************************************************************
+ok: [localhost] => (item=rhel9-hetzner-ocp4)
+
+TASK [image_builder : Set retry counter] *************************************************************************
+ok: [localhost]
+
+TASK [image_builder : Get compose requests ids if undefined] *****************************************************
+skipping: [localhost]
+
+TASK [image_builder : Verify compose request is finished] ********************************************************
+FAILED - RETRYING: [localhost]: Verify compose request is finished (15 retries left).
+FAILED - RETRYING: [localhost]: Verify compose request is finished (14 retries left).
+FAILED - RETRYING: [localhost]: Verify compose request is finished (13 retries left).
+FAILED - RETRYING: [localhost]: Verify compose request is finished (12 retries left).
+FAILED - RETRYING: [localhost]: Verify compose request is finished (11 retries left).
+FAILED - RETRYING: [localhost]: Verify compose request is finished (10 retries left).
+FAILED - RETRYING: [localhost]: Verify compose request is finished (9 retries left).
+FAILED - RETRYING: [localhost]: Verify compose request is finished (8 retries left).
+FAILED - RETRYING: [localhost]: Verify compose request is finished (7 retries left).
+FAILED - RETRYING: [localhost]: Verify compose request is finished (6 retries left).
+FAILED - RETRYING: [localhost]: Verify compose request is finished (5 retries left).
+FAILED - RETRYING: [localhost]: Verify compose request is finished (4 retries left).
+ok: [localhost] => (item=rhel9-hetzner-ocp4: compose_status: success, upload_status: success)
+
+TASK [image_builder : Set fact with release_str if release_id is set] ********************************************
+skipping: [localhost]
+
+TASK [image_builder : Start image download] **********************************************************************
+changed: [localhost] => (item=./rhel9-hetzner-ocp4.guest-image)
+
+TASK [image_builder : Confirm image download completed] **********************************************************
+FAILED - RETRYING: [localhost]: Confirm image download completed (10 retries left).
+FAILED - RETRYING: [localhost]: Confirm image download completed (9 retries left).
+FAILED - RETRYING: [localhost]: Confirm image download completed (8 retries left).
+changed: [localhost] => (item=rhel9-hetzner-ocp4)
+
+PLAY RECAP *******************************************************************************************************
+localhost                  : ok=9    changed=2    unreachable=0    failed=0    skipped=3    rescued=0    ignored=0
 ```
 
-2. Create and populate a vault (then put your vault password in a file or provide on the ansible-playbook command line):
-```
-$ echo 'vault_offline_token: "<your offline token here>"' > group_vars/all/vault
-$ ansible-vault encrypt group_vars/all/vault
-```
-
-3. If uploading images to OpenStack, install the `python3-openstackclient` (eg: in a venv)
-```
-$ python3 -m venv ~/venvs/ImageBuilder
-$ source ~/venvs/ImageBuilder/bin/activate
-$ pip install --upgrade pip python-openstackclient
-```
-
-### lifecycle-images.yaml
+#### lifecycle-images.yaml
 This playbook manages end-to-end lifecycle of images, from image builder to OpenStack. It will:
 
 1. Create new images using Red Hat's Insights Image Builder service
@@ -236,7 +298,7 @@ PLAY RECAP *********************************************************************
 localhost                  : ok=12   changed=6    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
 ```
 
-### list-distributions.yaml
+#### list-distributions.yaml
 Image builder allows building images with speciifc minor OS versions, such as RHEL 8.4, or 9.2, but these options are not listed on the web interface. This playbook uses one of the API methods to list all possible options.
 
 ```
@@ -324,7 +386,7 @@ PLAY RECAP *********************************************************************
 localhost                  : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
 ```
 
-### list-composes.yaml
+#### list-composes.yaml
 This playbook lists basic information of all available composes on the organization of the Red Hat account associated to the offline token, whether they match the definitions in this directory or not.
 
 ```
@@ -416,7 +478,7 @@ PLAY RECAP *********************************************************************
 localhost                  : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
 ```
 
-### get-compose-details.yaml
+#### get-compose-details.yaml
 Sometimes you just want to get the details of an existing compose. This is similar to the `Download compose request (json)` option on the web interface, but it shows the output on the screen rather than creating a separate file. Either provide the compose id as extra var, or use the var prompt.
 
 ```
@@ -480,7 +542,7 @@ PLAY RECAP *********************************************************************
 localhost                  : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
 ```
 
-### cleanup-composes.yaml
+#### cleanup-composes.yaml
 This playbook will delete compose requests in image builder, where the `image_name` matches the definitions. Note that other people's composes, where the image name matches to definitions in this directory, will be deleted.
 
 ```
@@ -683,7 +745,25 @@ PLAY RECAP *********************************************************************
 localhost                  : ok=7    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
 ```
 
-## Known issues and limitations
+### Playbooks to create a workflow in Ansible Automation Platform
+The following playbooks are meant to be used as part of an end-to-end image lifecycle workflow in Ansible Automation Platform.
+
+- check-payload-from-github.yaml: Uses the information in the pull request to decide if the workflow should continue
+- 01_request-image-creation.yaml: Requests image creation (if images with the same name and `release_id` are not present on `storage_dir` already)
+- 02_download-image.yaml: Wait for compose request(s) to complete successfully and download image(s). If more than one, images are downloaded in parallel.
+- 03_customize-image.yaml: Optionally run offline customizations (requires libguestfs on the execution environment)
+- 04_upload-to-rhosp.yaml: Upload images to Red Hat OpenStack Platform
+- 05_delete-from-rhosp.yaml: Delete older image versions from Red Hat OpenStack Platform
+
+At a minimum, the setup in Ansible Automation Platform requires:
+- A vault with your `vault_offline_token` (and therefore a credential of type vault with the password).
+- If uploading images to OpenStack, a credential of [type OpenStack](https://access.redhat.com/documentation/en-us/red_hat_ansible_automation_platform/2.4/html/automation_controller_user_guide/controller-credentials#ref-controller-credential-openstack) is needed. This provies all details required to upload the images, such as Keystone url, user, password, etc.
+- Persistent storage set on the Ansible Execution Environment, so that the different steps of the workflow can access the same files.
+
+![AAP_Workflow_01](./images/aap_workflow_01.png)
+
+
+## Known issues
 ### Image definition with custom size
 The [ImageRequest object](https://developers.redhat.com/api-catalog/api/image-builder#schema-ImageRequest) supports specifying the (optional) parameter image size. While setting this parameter in the image definition is supported by ansible-image-builder, it requires `[defaults]/jinja2_native` be set to `True` in ansible.cfg.
 Starting on Ansible Core 2.19, native data types is going to be the default. More details [here](https://github.com/nitzmahone/ansible-documentation/blob/core_data_tagging/docs/docsite/rst/porting_guides/porting_guide_core_2.19.rst#native-jinja-mode-required).
