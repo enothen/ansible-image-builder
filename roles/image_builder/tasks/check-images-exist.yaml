@@ -20,6 +20,5 @@
   loop: "{{ filecheck.results }}"
   loop_control:
     label: "{{ item.invocation.module_args.path }}"
-  #when: not item.stat.exists
   ansible.builtin.debug:
     msg: "{{ item.stat }}"
