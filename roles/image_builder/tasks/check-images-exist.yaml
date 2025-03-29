@@ -11,13 +11,15 @@
   loop_control:
     label: "{{ path }}"
   vars:
-    path: "{{ storage_dir | default('.') }}/{{ item.name }}{{ release_str | default('') }}.qcow2"
+    file_name: "{{ item.name }}{{ release_str | default('') }}"
+    file_extension: "{{ image_type_to_extension[item.compose.image_type] | default(item.compose.image_type) }}"
+    path: "{{ storage_dir }}/{{ file_name }}.{{ file_extension }}"
   register: filecheck
 
 - name: Show file status
   loop: "{{ filecheck.results }}"
   loop_control:
     label: "{{ item.invocation.module_args.path }}"
-  when: not item.stat.exists
+  #when: not item.stat.exists
   ansible.builtin.debug:
     msg: "{{ item.stat }}"
