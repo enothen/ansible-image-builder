@@ -10,7 +10,7 @@ sso_endpoint: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid
 api_endpoint: https://console.redhat.com/api/image-builder/v1
 
 # Where to copy the images when downloading and customizing
-#storage_dir: .
+storage_dir: .
 
 # How many times to check the status of image builds
 compose_check_retries: 15
@@ -20,3 +20,14 @@ compose_check_wait_secs: 60
 
 # How many loops of `compose_check_retries` to do, while renewing token in between loops (if expired)
 compose_check_max_loops: 5
+
+# Map image types to file extensions
+image_type_to_extension:
+  guest-image: qcow2
+  edge-commit: tar
+  rhel-edge-commit: tar
+  edge-installer: iso
+  rhel-edge-installer: iso
+  image-installer: iso
+  vsphere: vmdk
+  vsphere-ova: ova

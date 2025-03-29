@@ -7,18 +7,21 @@
 - name: Start image download
   ansible.builtin.get_url:
     url: "{{ image_url }}"
-    dest: "{{ image_path }}"
+    dest: "{{ path }}"
     mode: "0644"
   loop: "{{ compose_status_request.results }}"
   loop_control:
-    label: "{{ image_path | default('N/A') }}"
+    label: "{{ path | default('N/A') }}"
   when:
     - item.json is defined
     - item.json.image_status.status == "success"
     - item.json.image_status.upload_status.status == "success"
   vars:
     image_url: "{{ item.json.image_status.upload_status.options.url }}"
-    image_path: "{{ storage_dir | default('.') }}/{{ item.json.request.image_name }}{{ release_str | default('') }}.qcow2"
+    requested_type: "{{ item.json.request.image_requests[0].image_type }}"
+    file_name: "{{ item.json.request.image_name }}{{ release_str | default('') }}"
+    file_extension: "{{ image_type_to_extension[requested_type] | default(requested_type) }}"
+    path: "{{ storage_dir }}/{{ file_name }}.{{ file_extension }}"
   async: 600
   poll: 0
   register: download
