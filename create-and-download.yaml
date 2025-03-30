@@ -6,26 +6,31 @@
 
   tasks:
     - name: Check if image exists already
+      tags: filecheck
       ansible.builtin.import_role:
         name: image_builder
         tasks_from: check-images-exist
 
     - name: Get refresh token
+      tags: token
       ansible.builtin.import_role:
         name: image_builder
         tasks_from: get-refresh-token
 
     - name: Request creation of images
+      tags: request
       ansible.builtin.import_role:
         name: image_builder
         tasks_from: request-image-creation
 
     - name: Verify composes finished
+      tags: verify
       ansible.builtin.import_role:
         name: image_builder
         tasks_from: verify-compose-finished
 
     - name: Download images
+      tags: download
       ansible.builtin.import_role:
         name: image_builder
         tasks_from: download-images

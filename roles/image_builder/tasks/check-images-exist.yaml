@@ -11,8 +11,10 @@
   loop_control:
     label: "{{ path }}"
   vars:
+    requests: "{{ item.requests | default({}) }}"
     file_name: "{{ item.name }}{{ release_str | default('') }}"
-    file_extension: "{{ image_type_to_extension[item.compose.image_type] | default(item.compose.image_type) }}"
+    image_requests: "{{ default_image_request | ansible.builtin.combine(requests, recursive=true) }}"
+    file_extension: "{{ image_type_to_extension[image_requests.image_type] | default(item.requests.image_type) }}"
     path: "{{ storage_dir }}/{{ file_name }}.{{ file_extension }}"
   register: filecheck
 
