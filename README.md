@@ -17,8 +17,6 @@ A collection of Ansible playbooks to manage lifecycle of virtualization images u
       - [get-compose-details.yaml](#get-compose-detailsyaml)
       - [cleanup-composes.yaml](#cleanup-composesyaml)
     - [Playbooks to create a workflow in Ansible Automation Platform](#playbooks-to-create-a-workflow-in-ansible-automation-platform)
-  - [Known issues](#known-issues)
-    - [Image definition with custom size](#image-definition-with-custom-size)
 
 
 ## Prerequisites
@@ -53,11 +51,9 @@ Create image definitions in yaml, where the `images` variable contains an array 
 
 ```
   - name: String (max 100 char, required)
-    tags: Array<String>
-    compose: Object<ComposeRequest>
-      distribution: String, limited to specific options
-      image_description: String (max 250 char)
-      customizations: Object<Customizations>
+    distribution: String, limited to specific options, required
+    description: String (max 250 char), optional
+    customizations: Object<Customizations>, optional
 ```
 
 The schema of the ComposeRequest and Customizations objects, as well as the rest of all possible customizations are defined [here](https://developers.redhat.com/api-catalog/api/image-builder#content-schemas).
@@ -66,44 +62,43 @@ Basic image definition example: a RHEL 9.2 image that installs Apache, MariaDB a
 ```
 images:
   - name: rhel-9.2-lamp
-    compose:
-      distribution: rhel-92
-      image_description: "RHEL 9.2 with Apache, MariaDB and PHP"
-      customizations:
-        files:
-          - path: /etc/sudoers.d/dbagroup
-            mode: '0600'
-            user: root
-            group: root
-            data: |
-              # Sudo rules for database administrators
-              %dbas ALL= /usr/bin/systemctl start mysqld.service
-              %dbas ALL= /usr/bin/systemctl stop mysqld.service
-              %dbas ALL= /usr/bin/systemctl restart mysqld.service
-              %dbas ALL= /usr/bin/systemctl reload mysqld.service
-        firewall:
-          services:
-            enabled:
-              - ssh
-              - http
-              - https
-        filesystems:
-          - mountpoint: /var/www/html
-            min_size: 2048
-          - mountpoint: /var/lib/mysql
-            min_size: 2048
-        packages:
-          - httpd
-          - mariadb-server
-          - php
-          - php-mysqlnd
-        services:
-          enabled:
-            - firewalld
-            - httpd
-            - mariadb
+    distribution: rhel-92
+    description: "RHEL 9.2 with Apache, MariaDB and PHP"
+    customizations:
+    files:
+      - path: /etc/sudoers.d/dbagroup
+        mode: '0600'
+        user: root
+        group: root
+        data: |
+            # Sudo rules for database administrators
+            %dbas ALL= /usr/bin/systemctl start mysqld.service
+            %dbas ALL= /usr/bin/systemctl stop mysqld.service
+            %dbas ALL= /usr/bin/systemctl restart mysqld.service
+            %dbas ALL= /usr/bin/systemctl reload mysqld.service
+    firewall:
+      services:
+        enabled:
+          - ssh
+          - http
+          - https
+    filesystems:
+      - mountpoint: /var/www/html
+        min_size: 2048
+      - mountpoint: /var/lib/mysql
+        min_size: 2048
+    packages:
+      - httpd
+      - mariadb-server
+      - php
+      - php-mysqlnd
+    services:
+      enabled:
+        - firewalld
+        - httpd
+        - mariadb
 ```
-See more advanced example definitions in [examples/main.yaml](examples/main.yaml).
+See more advanced example definitions, including other image formats, architectures and customizations in [examples/main.yaml](examples/main.yaml).
 
 ### Image Builder customizations
 There are multiple customization methods available, all of them with their own restrictions. Some examples are:
@@ -761,9 +756,3 @@ At a minimum, the setup in Ansible Automation Platform requires:
 - Persistent storage set on the Ansible Execution Environment, so that the different steps of the workflow can access the same files.
 
 ![AAP_Workflow_01](./images/aap_workflow_01.png)
-
-
-## Known issues
-### Image definition with custom size
-The [ImageRequest object](https://developers.redhat.com/api-catalog/api/image-builder#schema-ImageRequest) supports specifying the (optional) parameter image size. While setting this parameter in the image definition is supported by ansible-image-builder, it requires `[defaults]/jinja2_native` be set to `True` in ansible.cfg.
-Starting on Ansible Core 2.19, native data types is going to be the default. More details [here](https://github.com/nitzmahone/ansible-documentation/blob/core_data_tagging/docs/docsite/rst/porting_guides/porting_guide_core_2.19.rst#native-jinja-mode-required).

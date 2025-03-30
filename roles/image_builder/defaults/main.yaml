@@ -3,11 +3,15 @@
 # by the user in group_vars.
 images: []
 
-# Endpoint required to request offline token
-sso_endpoint: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
-
-# Endpoint required to interact with image builer
-api_endpoint: https://console.redhat.com/api/image-builder/v1
+# Default image request is an x86_64 image with qcow2 format and uploaded to
+# aws s3, so that it can be downloaded. Image definitions can override all or
+# part of this structure. See examples.
+default_image_request:
+  architecture: x86_64
+  image_type: guest-image
+  upload_request:
+    options: {}
+    type: aws.s3
 
 # Where to copy the images when downloading and customizing
 storage_dir: .
@@ -20,14 +24,3 @@ compose_check_wait_secs: 60
 
 # How many loops of `compose_check_retries` to do, while renewing token in between loops (if expired)
 compose_check_max_loops: 5
-
-# Map image types to file extensions
-image_type_to_extension:
-  guest-image: qcow2
-  edge-commit: tar
-  rhel-edge-commit: tar
-  edge-installer: iso
-  rhel-edge-installer: iso
-  image-installer: iso
-  vsphere: vmdk
-  vsphere-ova: ova

@@ -1,0 +1,16 @@
+# Endpoint required to request offline token
+sso_endpoint: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
+
+# Endpoint required to interact with image builer
+api_endpoint: https://console.redhat.com/api/image-builder/v1
+
+# Map image types to file extensions
+image_type_to_extension:
+  guest-image: qcow2
+  edge-commit: tar
+  rhel-edge-commit: tar
+  edge-installer: iso
+  rhel-edge-installer: iso
+  image-installer: iso
+  vsphere: vmdk
+  vsphere-ova: ova
