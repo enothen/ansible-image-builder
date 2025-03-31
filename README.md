@@ -67,26 +67,26 @@ images:
     customizations:
       files:
         - path: /etc/sudoers.d/dbagroup
-            mode: '0600'
-            user: root
-            group: root
-            data: |
-                # Sudo rules for database administrators
-                %dbas ALL= /usr/bin/systemctl start mysqld.service
-                %dbas ALL= /usr/bin/systemctl stop mysqld.service
-                %dbas ALL= /usr/bin/systemctl restart mysqld.service
-                %dbas ALL= /usr/bin/systemctl reload mysqld.service
+          mode: '0600'
+          user: root
+          group: root
+          data: |
+            # Sudo rules for database administrators
+            %dbas ALL= /usr/bin/systemctl start mysqld.service
+            %dbas ALL= /usr/bin/systemctl stop mysqld.service
+            %dbas ALL= /usr/bin/systemctl restart mysqld.service
+            %dbas ALL= /usr/bin/systemctl reload mysqld.service
       firewall:
         services:
-            enabled:
+          enabled:
             - ssh
             - http
             - https
       filesystems:
         - mountpoint: /var/www/html
-            min_size: 2048
+          min_size: 2048
         - mountpoint: /var/lib/mysql
-            min_size: 2048
+          min_size: 2048
       packages:
         - httpd
         - mariadb-server
@@ -94,9 +94,9 @@ images:
         - php-mysqlnd
       services:
         enabled:
-            - firewalld
-            - httpd
-            - mariadb
+          - firewalld
+          - httpd
+          - mariadb
 ```
 See more advanced example definitions, including other image formats, architectures and customizations in [examples/main.yaml](examples/main.yaml).
 
