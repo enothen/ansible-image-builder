@@ -14,3 +14,4 @@ image_type_to_extension:
   image-installer: iso
   vsphere: vmdk
   vsphere-ova: ova
+  wsl: tgz
