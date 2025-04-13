@@ -1,0 +1,9 @@
+galaxy_info:
+  author: Eric Nothen
+  description: A role to manage lifecycle of virtualization images using Red Hat's Insights Image Builder API interface
+  license: GPL-3.0 license
+  min_ansible_version: 2.1
+  galaxy_tags:
+    - image_builder
+
+dependencies: []
