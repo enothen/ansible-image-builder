@@ -7,7 +7,7 @@
 
   vars_prompt:
     - name: compose
-      prompt: "Enter id of compose"
+      prompt: Enter id of compose
       private: false
 
   tasks:
