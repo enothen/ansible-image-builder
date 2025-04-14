@@ -1,28 +1,26 @@
 ---
-- name: Run virt-customize
-  ansible.builtin.shell: >
-    virt-customize -a {{ item.invocation.module_args.path }}
-    --run-command '{{ item.item.offline_customization }}'
+- name: Run virt-customize command
+  ansible.builtin.shell:
+    virt-customize -a {{ image_path }} {{ customizations }}
   loop: "{{ filecheck.results }}"
   loop_control:
-    label: "{{ item.invocation.module_args.path }}"
-  async: 1200
-  poll: 0
-  register: customize
+    label: "{{ image_path }}"
   environment:
     LIBGUESTFS_BACKEND: direct
   when:
-    - item.stat.exists
-    - item.item.offline_customization is defined | default(false)
+    - item.item.offline_customization.virt_customize is defined | default(false)
+  vars:
+    image_path: "{{ item.invocation.module_args.path }}"
+    customizations: "{{ item.item.offline_customization.virt_customize | join(' ') }}"
 
-- name: Confirm image customization finished
-  ansible.builtin.async_status:
-    jid: "{{ item.ansible_job_id }}"
-  register: job_result
-  until: job_result.finished
-  retries: 30
-  delay: 60
-  loop: "{{ customize.results }}"
+# virt-edit can only edit one single file per run, so have to do a nested loop
+- name: Run virt-edit commands
+  ansible.builtin.include_tasks: virt-edit.yaml
+  loop: "{{ filecheck.results }}"
   loop_control:
-    label: "{{ item.item.invocation.module_args.path }}"
-  when: item.changed
+    label: "{{ image_path }}"
+  when:
+    - item.item.offline_customization.virt_edit is defined | default(false)
+  vars:
+    image_path: "{{ item.invocation.module_args.path }}"
+    customizations: "{{ item.item.offline_customization.virt_edit }}"

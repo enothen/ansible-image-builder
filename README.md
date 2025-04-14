@@ -109,10 +109,28 @@ There are multiple customization methods available, all of them with their own r
 - **Implicit dependencies**: When adding any customization of type firewall (either ports or services), the firewalld package must also be explicitly added to the list of packages to install, or the image build would fail because the command `firewall-offline-cmd` is not available on the image. Idealy, you would also list `firewalld` on the enabled section of the services customization, in order for the service to start at boot.
 
 ### Offline customizations
-It is possible to further customize images after they are downloaded, using the libguestfs virt-customize command. This behavior is disabled by default. To run an offline customization command on any given image, add the key `offline_customization` to the image definition, where the value of the key is the command to run inside the image.
+It is possible to further customize images after they are downloaded, using the libguestfs `virt-customize` and `virt-edit` commands. To run offline customization commands on any given image, add a dictionary called `offline_customization`, which contains at least one of the following keys:
 
-Note that:
-1. The offline customization task takes a long time to complete, mainly because virt-customize will do an SElinux relabel after the changes. It is much more efficient customizing the image at build time, if there is a schema available for the change you want to make.
+- virt_customize: A list of commands that are concatenated and passed to `virt-customize`  in a single run. To understand available options, run `virt-customize --help`.
+- virt_edit: A list of dictionaries to do non-interactive, in-place edits of files inside the image using `virt-edit`. This dictionary must have two keys:
+  - file: The path to the file that will be modified
+  - expression: The expression to use to edit the file
+
+For example:
+```
+    offline_customization:
+      virt_customize:
+        - "--link /usr/bin/dracut:/sbin/dracut"
+      virt_edit:
+        - file: /etc/lvm/lvm.conf
+          expression: "s/# use_devicesfile = 1/use_devicesfile = 0/"
+        - file: /etc/selinux/config
+          expression: "s/^SELINUX=enforcing$/SELINUX=permissive/"
+```
+See also [examples/main.yaml](examples/main.yaml).
+
+**Important note:**
+1. Offline customization tasks can takes a long time to complete, mainly because virt-customize will do an SElinux relabel after the changes. It is much more efficient customizing the image at build time, if there is a schema available for the change you want to make.
 2. Your Ansible Execution Environment needs to have libguestfs-tools installed. You could do so by creating your own EE and include this rpm on the image.
 
 
