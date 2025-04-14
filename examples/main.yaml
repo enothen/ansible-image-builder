@@ -151,3 +151,28 @@ images:
           - firewalld
           - httpd
           - mariadb
+
+  # An image with both online (image builder) and offline (virt-customize, virt-edit)
+  # customizations. Offline customization requires guestfs-tools package to be installed.
+  - name: rhel9-hetzner-ocp4
+    distribution: rhel-9
+    description: RHEL 9.latest image customized for OCP4 on Hetzner
+    customizations:
+      kernel:
+        append: rd.auto
+      partitioning_mode: lvm
+      packages:
+        - lvm2
+        - mdadm
+        - bzip2
+      filesystem:
+        - mountpoint: /boot
+          min_size: 1024
+        - mountpoint: /
+          min_size: 10240
+    offline_customization:
+      virt_customize:
+        - "--link /usr/bin/dracut:/sbin/dracut"
+      virt_edit:
+        - file: /etc/lvm/lvm.conf
+          expression: "s/# use_devicesfile = 1/use_devicesfile = 0/"
