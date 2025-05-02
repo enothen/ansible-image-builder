@@ -9,6 +9,7 @@ A collection of Ansible playbooks to manage lifecycle of virtualization images u
     - [Offline customizations](#offline-customizations)
     - [Sharing images with cloud providers](#sharing-images-with-cloud-providers)
       - [Azure](#azure)
+      - [Google Cloud Platform](#google-cloud-platform)
   - [Setting a release id](#setting-a-release-id)
   - [Example playbooks](#example-playbooks)
     - [Playbooks to run from command line](#playbooks-to-run-from-command-line)
@@ -158,6 +159,19 @@ $ az role assignment create \
     --role Contributor \
     --scope /subscriptions/<Your subscription ID>/resourceGroups/<Your resource group>
 ```
+
+#### Google Cloud Platform
+To build a GCP image and share it with a Google account, add the following block in the image definition:
+```
+    requests:
+      image_type: gcp
+      upload_request:
+        type: gcp
+        options:
+          share_with_accounts:
+            - "user:account@domain.com"
+```
+Alternatively, to build a GCP image that is shared with Red Hat Insights only, remove the `options` key, and the whole structure below it.
 
 ## Setting a release id
 The example in this repository uses event information from Github in order to identify the pull request that triggers an image build. If you are running the image lifecycle playbook from command line, unset `release_id` from the images definitions file so that a timestamp is used instead.

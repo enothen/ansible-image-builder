@@ -78,6 +78,27 @@ images:
           subscription_id: 97caf43d-a347-414c-af81-fb6fd80aec67
           hyper_v_generation: V2
 
+  # This GCP image is shared with Red Hat insights only
+  - name: rhel-9-gcp-insights-ib
+    distribution: rhel-9
+    description: RHEL 9.latest image shared with Google Cloud Platform, only insights
+    requests:
+      image_type: gcp
+      upload_request:
+        type: gcp
+
+  # Same as above, but also share with a Google account
+  - name: rhel-9-gcp-account-enothen-ib
+    distribution: rhel-9
+    description: RHEL 9.latest image shared with Google Cloud Platform, with a specific user
+    requests:
+      image_type: gcp
+      upload_request:
+        type: gcp
+        options:
+          share_with_accounts:
+            - "user:account@domain.com"
+
   # Image with a custom size and in vmdk format for vSphere
   - name: rhel-8-vsphere-ib
     distribution: rhel-8
