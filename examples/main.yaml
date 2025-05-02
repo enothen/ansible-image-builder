@@ -64,6 +64,20 @@ images:
           share_with_sources:
             - "123456"
 
+  # Similar to above, but share with and Azure tenant and resource group
+  - name: rhel-9-azure-ib
+    distribution: rhel-9
+    description: RHEL 9.latest image shared with an Azure tenant
+    requests:
+      image_type: azure
+      upload_request:
+        type: azure
+        options:
+          tenant_id: c5900e79-46b7-451a-81cc-64f9f63e1c06
+          resource_group: openenv-abcdef
+          subscription_id: 97caf43d-a347-414c-af81-fb6fd80aec67
+          hyper_v_generation: V2
+
   # Image with a custom size and in vmdk format for vSphere
   - name: rhel-8-vsphere-ib
     distribution: rhel-8

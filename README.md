@@ -7,6 +7,8 @@ A collection of Ansible playbooks to manage lifecycle of virtualization images u
   - [Creating image definitions](#creating-image-definitions)
     - [Image Builder customizations](#image-builder-customizations)
     - [Offline customizations](#offline-customizations)
+    - [Sharing images with cloud providers](#sharing-images-with-cloud-providers)
+      - [Azure](#azure)
   - [Setting a release id](#setting-a-release-id)
   - [Example playbooks](#example-playbooks)
     - [Playbooks to run from command line](#playbooks-to-run-from-command-line)
@@ -24,7 +26,7 @@ To use this Ansible role and run the playbooks in this repository you need:
 1. A user account on Red Hat's customer portal
 2. An offline token, which you can generate [here](https://access.redhat.com/management/api)
 3. Somewhere to run ansible-playbooks, such as Ansible Automation Platform or otherwise through command line
-4. Optionally: A private cloud (such as OpenStack) where to upload and rotate the images
+4. Optionally: A private cloud (such as OpenStack) where to upload and rotate the images, or a tenant in a cloud provider where to share the images.
 
 ## Configuration
 1. clone this repository to your Ansible server of choice:
@@ -133,6 +135,29 @@ See also [examples/main.yaml](examples/main.yaml).
 1. Offline customization tasks can takes a long time to complete, mainly because virt-customize will do an SElinux relabel after the changes. It is much more efficient customizing the image at build time, if there is a schema available for the change you want to make.
 2. Your Ansible Execution Environment needs to have libguestfs-tools installed. You could do so by creating your own EE and include this rpm on the image.
 
+### Sharing images with cloud providers
+Insights image builder can share images with cloud providers automatically after build, provided the yaml definition has all required fields. See minimal details below, or complete definitions in [examples/main.yaml](examples/main.yaml).
+
+#### Azure
+Images shared with Azure require the definition to include the following fields:
+```
+    requests:
+      image_type: azure
+      upload_request:
+        type: azure
+        options:
+          tenant_id: <Your tenant ID>
+          resource_group: <Your resource group>
+          subscription_id: <Your subscription ID>
+          hyper_v_generation: <V1 (BIOS) | V2 (UEFI)>
+```
+Note that you will have to authorize Image Builder to push images to the resource group, or the image build will fail. Example using the az cli:
+```
+$ az role assignment create \
+    --assignee df4c7ed6-d52b-4995-b6b7-7506f4c9c051 \
+    --role Contributor \
+    --scope /subscriptions/<Your subscription ID>/resourceGroups/<Your resource group>
+```
 
 ## Setting a release id
 The example in this repository uses event information from Github in order to identify the pull request that triggers an image build. If you are running the image lifecycle playbook from command line, unset `release_id` from the images definitions file so that a timestamp is used instead.
