@@ -1,3 +1,4 @@
+---
 galaxy_info:
   author: Eric Nothen
   description: A role to manage lifecycle of virtualization images using Red Hat's Insights Image Builder API interface
