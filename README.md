@@ -11,6 +11,7 @@ A collection of Ansible playbooks to manage lifecycle of virtualization images u
     - [Image Builder customizations](#image-builder-customizations)
     - [Offline customizations](#offline-customizations)
     - [Sharing images with cloud providers](#sharing-images-with-cloud-providers)
+      - [Amazon Web Services](#amazon-web-services)
       - [Azure](#azure)
       - [Google Cloud Platform](#google-cloud-platform)
   - [Setting a release id](#setting-a-release-id)
@@ -166,6 +167,29 @@ See also [examples/main.yaml](examples/main.yaml).
 
 ### Sharing images with cloud providers
 Insights image builder can share images with cloud providers automatically after build, provided the yaml definition has all required fields. See minimal details below, or complete definitions in [examples/main.yaml](examples/main.yaml).
+
+#### Amazon Web Services
+Images shared with AWS require the definition to include the following fields:
+```
+    requests:
+      image_type: <ami|aws>
+      upload_request:
+        type: aws
+        options:
+          share_with_accounts:
+            - <AWS Account ID (12 digits)>
+```
+Alternatively, if the account is already configured as a source in the hybrid cloud console, you can use the source id and `share_with_sources` instead of `share_with_accounts`:
+```
+    requests:
+      image_type: <ami|aws>
+      upload_request:
+        type: aws
+        options:
+          share_with_sources:
+            - <Source ID (6 digits)>
+```
+To find the source ID, in the hybrid cloud console navigate to Integrations > Cloud, select filter `Type` and `Amazon Web Services`, then click on the name of the source you are looking for and the id will be shown in the url as `.../integrations/detail/<source id>?...`.
 
 #### Azure
 Images shared with Azure require the definition to include the following fields:

@@ -53,7 +53,7 @@ images:
     distribution: rhel-9
 
   # Same as above, but instead of preparing image for download, share with
-  # aws account
+  # aws account that is already configured as a source in the hybrid cloud console
   - name: rhel-9-base-aws-ib
     distribution: rhel-9
     requests:
@@ -63,6 +63,18 @@ images:
         options:
           share_with_sources:
             - "123456"
+
+  # Same as above but image type is ami and the image is shared with an account,
+  # not with a source configured in the hybrid cloud console
+  - name: rhel-9-base-ami-ib
+    distribution: rhel-9
+    requests:
+      image_type: ami
+      upload_request:
+        type: aws
+        options:
+          share_with_account:
+            - "123456789012"
 
   # Similar to above, but share with and Azure tenant and resource group
   - name: rhel-9-azure-ib
