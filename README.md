@@ -4,6 +4,9 @@ A collection of Ansible playbooks to manage lifecycle of virtualization images u
 - [ansible-image-builder](#ansible-image-builder)
   - [Prerequisites](#prerequisites)
   - [Configuration](#configuration)
+  - [Image types](#image-types)
+    - [Downloadable images](#downloadable-images)
+    - [Pushable images](#pushable-images)
   - [Creating image definitions](#creating-image-definitions)
     - [Image Builder customizations](#image-builder-customizations)
     - [Offline customizations](#offline-customizations)
@@ -49,6 +52,28 @@ $ source ~/venvs/ImageBuilder/bin/activate
 $ pip install --upgrade pip python-openstackclient
 ```
 
+## Image types
+Insights image builder supports different types of images, which can be classified in two groups: the ones you can download, and the ones you can push to public cloud providers.
+You can use `ansible-image-builder` to build all of the image types supported by Insights Image Builder.
+
+### Downloadable images
+This type of images are copied to an AWS S3 bucket after the build completes successfully, so that they can be downloaded to be used in private clouds, virtualization environments, etc.
+- edge-commit
+- edge-installer
+- guest-image
+- rhel-edge-commit
+- rhel-edge-installer
+The actual file format depends on the image type. For example, the `guest-image` type will create a `.qcow2` file, and the `vsphere` type will create a `.vmdk` file. The list of all extensions matching the image types are defined [here](https://github.com/enothen/ansible-image-builder/blob/main/roles/image_builder/vars/main.yaml#L7-L17).
+
+### Pushable images
+This type of images are build for a public cloud provider, and pushed to a specified environment after the build completes successfully, which means the image definition may require parameters such as tenant, subscription, resource group, etc. See [examples/main.yaml](examples/main.yaml) for more details.
+- ami
+- aws
+- azure
+- gcp
+- oci
+- vhd
+
 ## Creating image definitions
 Create image definitions in yaml, where the `images` variable contains an array of images to manage. Each of the entries is a dictionary with the following format:
 
@@ -61,7 +86,18 @@ Create image definitions in yaml, where the `images` variable contains an array 
 
 The schema of the ComposeRequest and Customizations objects, as well as the rest of all possible customizations are defined [here](https://developers.redhat.com/api-catalog/api/image-builder#content-schemas).
 
-Basic image definition example: a RHEL 9.2 image that installs Apache, MariaDB and PHP, customizing firewall, services and filesystems:
+Unless overriden in the image definition, the `image_type` defaults to `guest-image` and the `architecture` to `x86_64`.
+
+### Image Builder customizations
+There are multiple customization methods available, all of them with their own restrictions. Some examples are:
+
+- **filesystems**: ISO and OSTree images don't support filesystems. If you have a customization of type `filesystem` and a type of `edge-installer` or `edge-commit`, the compose request is going to be rejected. See valid image types for Insights Image Builder [here](https://developers.redhat.com/api-catalog/api/image-builder#schema-ImageTypes), and documentation of image types [here](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/composing_a_customized_rhel_system_image/index#specifying-a-custom-filesystem-configuration_creating-system-images-with-composer-command-line-interface).
+- **directories**: You can define new directories or directory structures and define the user, password and mode of the directory, as long as the directory's path is under /etc. If you add directories outside of /etc, the image build request is going to be accepted, but the build is going to fail. This is documented [here](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/composing_a_customized_rhel_system_image/creating-system-images-with-composer-command-line-interface_composing-a-customized-rhel-system-image#specifying_customized_directories_in_the_blueprint).
+- **firewall**: Sligthly different to what the `firewall-cmd --add-port` command expects, adding ports to the firewall in image builder is done with the `:` separator, therefore a list of `<port>:<protocol>` is required. This is documented [here](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/composing_a_customized_rhel_system_image/creating-system-images-with-composer-command-line-interface_composing-a-customized-rhel-system-image#customizing-firewall_creating-system-images-with-composer-command-line-interface).
+- **Implicit dependencies**: When adding any customization of type firewall (either ports or services), the firewalld package must also be explicitly added to the list of packages to install, or the image build would fail because the command `firewall-offline-cmd` is not available on the image. Idealy, you would also list `firewalld` on the enabled section of the services customization, in order for the service to start at boot.
+- **image type restrictions**: Some customization methods are not supported in combination with specific image types. For example, the image types `rhel-edge-commit` and `rhel-edge-installer` don't support the `kernel` customization method.
+
+Here's a definition example: a RHEL 9.2 image that installs Apache, MariaDB and PHP, customizing firewall, services and filesystems:
 ```
 images:
   - name: rhel-9.2-lamp
@@ -103,14 +139,6 @@ images:
 ```
 See more advanced example definitions, including other image formats, architectures and customizations in [examples/main.yaml](examples/main.yaml).
 
-### Image Builder customizations
-There are multiple customization methods available, all of them with their own restrictions. Some examples are:
-
-- **filesystems**: ISO and OSTree images don't support filesystems. If you have a customization of type `filesystem` and a type of `edge-installer` or `edge-commit`, the compose request is going to be rejected. See valid image types for Insights Image Builder [here](https://developers.redhat.com/api-catalog/api/image-builder#schema-ImageTypes), and documentation of image types [here](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/composing_a_customized_rhel_system_image/index#specifying-a-custom-filesystem-configuration_creating-system-images-with-composer-command-line-interface).
-- **directories**: You can define new directories or directory structures and define the user, password and mode of the directory, as long as the directory's path is under /etc. If you add directories outside of /etc, the image build request is going to be accepted, but the build is going to fail. This is documented [here](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/composing_a_customized_rhel_system_image/creating-system-images-with-composer-command-line-interface_composing-a-customized-rhel-system-image#specifying_customized_directories_in_the_blueprint).
-- **firewall**: Sligthly different to what the `firewall-cmd --add-port` command expects, adding ports to the firewall in image builder is done with the `:` separator, therefore a list of `<port>:<protocol>` is required. This is documented [here](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/composing_a_customized_rhel_system_image/creating-system-images-with-composer-command-line-interface_composing-a-customized-rhel-system-image#customizing-firewall_creating-system-images-with-composer-command-line-interface).
-- **Implicit dependencies**: When adding any customization of type firewall (either ports or services), the firewalld package must also be explicitly added to the list of packages to install, or the image build would fail because the command `firewall-offline-cmd` is not available on the image. Idealy, you would also list `firewalld` on the enabled section of the services customization, in order for the service to start at boot.
-
 ### Offline customizations
 It is possible to further customize images after they are downloaded, using the libguestfs `virt-customize` and `virt-edit` commands. To run offline customization commands on any given image, add a dictionary called `offline_customization`, which contains at least one of the following keys:
 
@@ -143,7 +171,7 @@ Insights image builder can share images with cloud providers automatically after
 Images shared with Azure require the definition to include the following fields:
 ```
     requests:
-      image_type: azure
+      image_type: <azure|vhd>
       upload_request:
         type: azure
         options:
