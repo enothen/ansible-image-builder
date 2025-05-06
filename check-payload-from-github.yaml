@@ -9,13 +9,13 @@
 
   tasks:
     - name: Set fact if this is a PR merged on main branch
-      set_fact:
-        pr_merged_main: true
       when:
         - awx_webhook_event_type is defined
         - awx_webhook_event_type == "pull_request"
         - awx_webhook_payload['pull_request']['merged'] | bool
         - awx_webhook_payload['pull_request']['base']['ref'] == "main"
+      set_fact:
+        pr_merged_main: true
 
     - name: Fail if this is any other event
       when: not pr_merged_main

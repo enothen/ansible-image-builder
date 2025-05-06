@@ -53,7 +53,7 @@ images:
     distribution: rhel-9
 
   # Same as above, but instead of preparing image for download, share with
-  # aws account
+  # aws account that is already configured as a source in the hybrid cloud console
   - name: rhel-9-base-aws-ib
     distribution: rhel-9
     requests:
@@ -63,6 +63,62 @@ images:
         options:
           share_with_sources:
             - "123456"
+
+  # Same as above but image type is ami and the image is shared with an account,
+  # not with a source configured in the hybrid cloud console
+  - name: rhel-9-base-ami-ib
+    distribution: rhel-9
+    requests:
+      image_type: ami
+      upload_request:
+        type: aws
+        options:
+          share_with_account:
+            - "123456789012"
+
+  # Similar to above, but share with and Azure tenant and resource group
+  - name: rhel-9-azure-ib
+    distribution: rhel-9
+    description: RHEL 9.latest image shared with an Azure tenant
+    requests:
+      image_type: azure
+      upload_request:
+        type: azure
+        options:
+          tenant_id: c5900e79-46b7-451a-81cc-64f9f63e1c06
+          resource_group: openenv-abcdef
+          subscription_id: 97caf43d-a347-414c-af81-fb6fd80aec67
+          hyper_v_generation: V2
+
+  # This GCP image is shared with Red Hat insights only
+  - name: rhel-9-gcp-insights-ib
+    distribution: rhel-9
+    description: RHEL 9.latest image shared with Google Cloud Platform, only insights
+    requests:
+      image_type: gcp
+      upload_request:
+        type: gcp
+
+  # Same as above, but also share with a Google account
+  - name: rhel-9-gcp-account-enothen-ib
+    distribution: rhel-9
+    description: RHEL 9.latest image shared with Google Cloud Platform, with a specific user
+    requests:
+      image_type: gcp
+      upload_request:
+        type: gcp
+        options:
+          share_with_accounts:
+            - "user:account@domain.com"
+
+  # This image for Oracle Cloud infrastructure is left in an OCI storage bucket, available to be
+  # (manually) imported and used. Image Builder does not do this automatically in the case of OCI.
+  - name: rhel-9-base-oci-ib
+    distribution: rhel-9
+    requests:
+      image_type: oci
+      upload_request:
+        type: oci.objectstorage
 
   # Image with a custom size and in vmdk format for vSphere
   - name: rhel-8-vsphere-ib
