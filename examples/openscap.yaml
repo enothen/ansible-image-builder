@@ -1,0 +1,93 @@
+---
+#
+# The customization in each of these definitions match the OpenScap profiles
+# available in Insights Image Builder
+#
+images:
+  # CIS Red Hat Enterprise Linux 9 Benchmark for Level 2 - Server
+  - name: rhel-9-x86_64-cis-level2-server-ib
+    distribution: rhel-9
+    description: RHEL 9 image with CIS Level 2 OpenScap profile
+    customizations:
+      filesystem:
+        - mountpoint: /
+          min_size: 10737418240
+        - mountpoint: /home
+          min_size: 1073741824
+        - mountpoint: /tmp
+          min_size: 1073741824
+        - mountpoint: /var
+          min_size: 3221225472
+        - mountpoint: /var/log
+          min_size: 1073741824
+        - mountpoint: /var/log/audit
+          min_size: 10737418240
+        - mountpoint: /var/tmp
+          min_size: 1073741824
+      kernel:
+        append: "audit_backlog_limit=8192 audit=1"
+      openscap:
+        profile_id: xccdf_org.ssgproject.content_profile_cis
+      packages:
+        - aide
+        - sudo
+        - libpwquality
+        - systemd-journal-remote
+        - firewalld
+        - nftables
+        - libselinux
+        - audit-libs
+        - audit
+      services:
+        enabled:
+          - auditd
+          - crond
+          - firewalld
+          - systemd-journald
+        masked:
+          - cups
+          - nfs-server
+          - rpcbind
+          - avahi-daemon
+          - autofs
+          - bluetooth
+          - nftables
+
+  # DRAFT - Unclassified Information in Non-federal Information Systems and Organizations (NIST 800-171)
+  - name: rhel-9-nist-800-171-ib
+    distribution: rhel-9
+    description: RHEL 9 image with NIST 800-171 OpenScap profile
+    customizations:
+      filesystem:
+        - mountpoint: /
+          min_size: 10737418240
+        - mountpoint: /var/log/audit
+          min_size: 10737418240
+      kernel:
+        append: "audit_backlog_limit=8192 audit=1 vsyscall=none page_alloc.shuffle=1 init_on_alloc=1"
+      openscap:
+        profile_id: xccdf_org.ssgproject.content_profile_cui
+      packages:
+        - crypto-policies
+        - sudo
+        - gnutls-utils
+        - openscap-scanner
+        - scap-security-guide
+        - subscription-manager
+        - dnf-automatic
+        - firewalld
+        - fapolicyd
+        - chrony
+        - openssh-clients
+        - openssh-server
+        - usbguard
+        - audit
+      services:
+        enabled:
+          - auditd
+          - usbguard
+          - fapolicyd
+          - firewalld
+        masked:
+          - kdump
+          - debug-shell
