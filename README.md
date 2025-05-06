@@ -59,7 +59,7 @@ Insights image builder supports different types of images, which can be classifi
 You can use `ansible-image-builder` to build all of the image types supported by Insights Image Builder.
 
 ### Downloadable images
-This type of images are copied to an AWS S3 bucket after the build completes successfully, so that they can be downloaded to be used in private clouds, virtualization environments, etc.
+These types of images are copied to an AWS S3 bucket after the build completes successfully, so that they can be downloaded to be used in private clouds, virtualization environments, etc.
 - edge-commit
 - edge-installer
 - guest-image
@@ -168,7 +168,7 @@ See also [examples/main.yaml](examples/main.yaml).
 2. Your Ansible Execution Environment needs to have libguestfs-tools installed. You could do so by creating your own EE and include this rpm on the image.
 
 ### Sharing images with cloud providers
-Insights image builder can share images with cloud providers after a successfull build, provided the yaml definition has all required fields. See minimal requirements below, or complete definitions in [examples/main.yaml](examples/main.yaml).
+Insights image builder can share images with cloud providers after a successfull build, provided the yaml definition has all required fields. See minimal requirements below, or complete definitions in [examples/public-cloud.yaml](examples/public-cloud.yaml).
 This is also documented in detail [here](https://docs.redhat.com/en/documentation/red_hat_insights/1-latest/html-single/deploying_and_managing_rhel_systems_in_hybrid_clouds/index#assembly_launching-customized-rhel-images-to-the-cloud-platforms-with-image-builder_host-management-services).
 
 #### Amazon Web Services
