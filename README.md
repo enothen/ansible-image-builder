@@ -6,7 +6,7 @@ A collection of Ansible playbooks to manage lifecycle of virtualization images u
   - [Configuration](#configuration)
   - [Image types](#image-types)
     - [Downloadable images](#downloadable-images)
-    - [Pushable images](#pushable-images)
+    - [Shareable images](#shareable-images)
   - [Creating image definitions](#creating-image-definitions)
     - [Image Builder customizations](#image-builder-customizations)
     - [Offline customizations](#offline-customizations)
@@ -14,6 +14,7 @@ A collection of Ansible playbooks to manage lifecycle of virtualization images u
       - [Amazon Web Services](#amazon-web-services)
       - [Azure](#azure)
       - [Google Cloud Platform](#google-cloud-platform)
+      - [Oracle Cloud Infrastructure](#oracle-cloud-infrastructure)
   - [Setting a release id](#setting-a-release-id)
   - [Example playbooks](#example-playbooks)
     - [Playbooks to run from command line](#playbooks-to-run-from-command-line)
@@ -64,10 +65,11 @@ This type of images are copied to an AWS S3 bucket after the build completes suc
 - guest-image
 - rhel-edge-commit
 - rhel-edge-installer
+
 The actual file format depends on the image type. For example, the `guest-image` type will create a `.qcow2` file, and the `vsphere` type will create a `.vmdk` file. The list of all extensions matching the image types are defined [here](https://github.com/enothen/ansible-image-builder/blob/main/roles/image_builder/vars/main.yaml#L7-L17).
 
-### Pushable images
-This type of images are build for a public cloud provider, and pushed to a specified environment after the build completes successfully, which means the image definition may require parameters such as tenant, subscription, resource group, etc. See [examples/main.yaml](examples/main.yaml) for more details.
+### Shareable images
+These types of images are built for a public cloud provider and shared with specified tenants or accounts after the build completes successfully, which means the image definition may require parameters such as tenant, subscription, resource group, etc. See [examples/main.yaml](examples/main.yaml) for more details.
 - ami
 - aws
 - azure
@@ -166,7 +168,8 @@ See also [examples/main.yaml](examples/main.yaml).
 2. Your Ansible Execution Environment needs to have libguestfs-tools installed. You could do so by creating your own EE and include this rpm on the image.
 
 ### Sharing images with cloud providers
-Insights image builder can share images with cloud providers automatically after build, provided the yaml definition has all required fields. See minimal details below, or complete definitions in [examples/main.yaml](examples/main.yaml).
+Insights image builder can share images with cloud providers after a successfull build, provided the yaml definition has all required fields. See minimal requirements below, or complete definitions in [examples/main.yaml](examples/main.yaml).
+This is also documented in detail [here](https://docs.redhat.com/en/documentation/red_hat_insights/1-latest/html-single/deploying_and_managing_rhel_systems_in_hybrid_clouds/index#assembly_launching-customized-rhel-images-to-the-cloud-platforms-with-image-builder_host-management-services).
 
 #### Amazon Web Services
 Images shared with AWS require the definition to include the following fields:
@@ -224,6 +227,16 @@ To build a GCP image and share it with a Google account, add the following block
             - "user:account@domain.com"
 ```
 Alternatively, to build a GCP image that is shared with Red Hat Insights only, remove the `options` key, and the whole structure below it.
+
+#### Oracle Cloud Infrastructure
+To build an OCI image use the following structure:
+```
+    requests:
+      image_type: oci
+      upload_request:
+        type: oci.objectstorage
+```
+When the build finishes, a link and instructions are provided on the Hybrid Cloud Console to import the image in OCI.
 
 ## Setting a release id
 The example in this repository uses event information from Github in order to identify the pull request that triggers an image build. If you are running the image lifecycle playbook from command line, unset `release_id` from the images definitions file so that a timestamp is used instead.

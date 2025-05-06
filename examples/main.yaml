@@ -111,6 +111,15 @@ images:
           share_with_accounts:
             - "user:account@domain.com"
 
+  # This image for Oracle Cloud infrastructure is left in an OCI storage bucket, available to be
+  # (manually) imported and used. Image Builder does not do this automatically in the case of OCI.
+  - name: rhel-9-base-oci-ib
+    distribution: rhel-9
+    requests:
+      image_type: oci
+      upload_request:
+        type: oci.objectstorage
+
   # Image with a custom size and in vmdk format for vSphere
   - name: rhel-8-vsphere-ib
     distribution: rhel-8
