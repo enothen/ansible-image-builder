@@ -1,0 +1,52 @@
+---
+#
+# The customization in each of these definitions match the OpenScap profiles
+# available in Insights Image Builder
+#
+images:
+  # DRAFT - Unclassified Information in Non-federal Information Systems and Organizations (NIST 800-171)
+  - name: rhel-9-gcp-account-enothen-lvm-ib
+    distribution: rhel-9
+    description: RHEL 9.latest image shared with Google Cloud Platform
+    customizations:
+      partitioning_mode: lvm
+      filesystem:
+        - mountpoint: /
+          min_size: 10737418240
+        - mountpoint: /var/log/audit
+          min_size: 10737418240
+      kernel:
+        append: "audit_backlog_limit=8192 audit=1 vsyscall=none page_alloc.shuffle=1 init_on_alloc=1"
+      openscap:
+        profile_id: "xccdf_org.ssgproject.content_profile_cui"
+      packages:
+        - crypto-policies
+        - sudo
+        - gnutls-utils
+        - openscap-scanner
+        - scap-security-guide
+        - subscription-manager
+        - dnf-automatic
+        - firewalld
+        - fapolicyd
+        - chrony
+        - openssh-clients
+        - openssh-server
+        - usbguard
+        - audit
+      services:
+        enabled:
+          - auditd
+          - usbguard
+          - fapolicyd
+          - firewalld
+        masked:
+          - kdump
+          - debug-shell
+    requests:
+      image_type: gcp
+      upload_request:
+        type: gcp
+        options:
+          share_with_accounts:
+            - "user:enothen@redhat.com"
