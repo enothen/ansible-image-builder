@@ -15,6 +15,7 @@ A collection of Ansible playbooks to manage lifecycle of virtualization images u
       - [Azure](#azure)
       - [Google Cloud Platform](#google-cloud-platform)
       - [Oracle Cloud Infrastructure](#oracle-cloud-infrastructure)
+    - [OpenScap profiles](#openscap-profiles)
   - [Setting a release id](#setting-a-release-id)
   - [Example playbooks](#example-playbooks)
     - [Playbooks to run from command line](#playbooks-to-run-from-command-line)
@@ -237,6 +238,9 @@ To build an OCI image use the following structure:
         type: oci.objectstorage
 ```
 When the build finishes, a link and instructions are provided on the Hybrid Cloud Console to import the image in OCI.
+
+### OpenScap profiles
+Insights Image Builder support many OpenScap profiles. Each of these profiles will contain a number of customizations, such as filesystems, packages, services, etc. To see the customizations required to comply with each OpenScap profiles, see the examples in the file [examples/openscap.yaml](examples/openscap.yaml).
 
 ## Setting a release id
 The example in this repository uses event information from Github in order to identify the pull request that triggers an image build. If you are running the image lifecycle playbook from command line, unset `release_id` from the images definitions file so that a timestamp is used instead.
