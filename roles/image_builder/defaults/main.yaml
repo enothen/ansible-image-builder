@@ -2,7 +2,6 @@
 # Default to empty for clean exit of playbooks. This sould be overridden
 # by the user in group_vars.
 images: []
-
 # Default image request is an x86_64 image with qcow2 format and uploaded to
 # aws s3, so that it can be downloaded. Image definitions can override all or
 # part of this structure. See examples.

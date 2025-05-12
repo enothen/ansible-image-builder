@@ -1,7 +1,6 @@
 ---
 - name: Run virt-edit command
-  ansible.builtin.shell:
-    virt-edit -e {{ virtedit.expression | quote }} -a {{ image_path }} {{ virtedit.file }}
+  ansible.builtin.shell: virt-edit -e {{ virtedit.expression | quote }} -a {{ image_path }} {{ virtedit.file }}
   loop: "{{ customizations }}"
   loop_control:
     loop_var: virtedit
