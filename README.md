@@ -143,10 +143,10 @@ See more advanced example definitions, including other image formats, architectu
 Some customization methods may have their own restrictions, limitations or dependencies. Some notes are provided below for awareness.
 
 #### Repositories
-You may want to use custom content in your image build. For this, you can use a custom repository, where you upload your custom rpms. Once you have that completed, you one or both of the following customization methods:
+You may want to use custom content in your image build. For this, you can use a custom repository, where you upload your custom rpms. Once you have that completed, use the following customization methods:
 
 - `payload_repositories`: A list of repositories to use during the image build. Use this to install custom packages (not available in Red Hat repositories).
-- `custom_repositories`: A list of repositories to be defined inside the image, but not defined or used during the image build. This makes it possible to define an internal repository that is not available to image builder, but is available internally once an instance has been created from the image.
+- `custom_repositories`: A list of repositories to be defined inside the image, but not defined or used during the image build. This makes it possible to define repositories that are not available to image builder, but are available internally once an instance has been created from the image.
 
 Here's a minimal example that uses both customization methods:
 ```
