@@ -9,6 +9,11 @@ A collection of Ansible playbooks to manage lifecycle of virtualization images u
     - [Shareable images](#shareable-images)
   - [Creating image definitions](#creating-image-definitions)
     - [Image Builder customizations](#image-builder-customizations)
+      - [Repositories](#repositories)
+      - [Filesystems](#filesystems)
+      - [Directories](#directories)
+      - [Firewall](#firewall)
+      - [Restrictions by image\_type](#restrictions-by-image_type)
     - [Offline customizations](#offline-customizations)
     - [Sharing images with cloud providers](#sharing-images-with-cloud-providers)
       - [Amazon Web Services](#amazon-web-services)
@@ -93,15 +98,7 @@ The schema of the ComposeRequest and Customizations objects, as well as the rest
 Unless overriden in the image definition, the `image_type` defaults to `guest-image` and the `architecture` to `x86_64`.
 
 ### Image Builder customizations
-There are multiple customization methods available, all of them with their own restrictions. Some examples are:
-
-- **filesystems**: ISO and OSTree images don't support filesystems. If you have a customization of type `filesystem` and a type of `edge-installer` or `edge-commit`, the compose request is going to be rejected. See valid image types for Insights Image Builder [here](https://developers.redhat.com/api-catalog/api/image-builder#schema-ImageTypes), and documentation of image types [here](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/composing_a_customized_rhel_system_image/index#specifying-a-custom-filesystem-configuration_creating-system-images-with-composer-command-line-interface).
-- **directories**: You can define new directories or directory structures and define the user, password and mode of the directory, as long as the directory's path is under /etc. If you add directories outside of /etc, the image build request is going to be accepted, but the build is going to fail. This is documented [here](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/composing_a_customized_rhel_system_image/creating-system-images-with-composer-command-line-interface_composing-a-customized-rhel-system-image#specifying_customized_directories_in_the_blueprint).
-- **firewall**: Sligthly different to what the `firewall-cmd --add-port` command expects, adding ports to the firewall in image builder is done with the `:` separator, therefore a list of `<port>:<protocol>` is required. This is documented [here](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/composing_a_customized_rhel_system_image/creating-system-images-with-composer-command-line-interface_composing-a-customized-rhel-system-image#customizing-firewall_creating-system-images-with-composer-command-line-interface).
-- **Implicit dependencies**: When adding any customization of type firewall (either ports or services), the firewalld package must also be explicitly added to the list of packages to install, or the image build would fail because the command `firewall-offline-cmd` is not available on the image. Idealy, you would also list `firewalld` on the enabled section of the services customization, in order for the service to start at boot.
-- **image type restrictions**: Some customization methods are not supported in combination with specific image types. For example, the image types `rhel-edge-commit` and `rhel-edge-installer` don't support the `kernel` customization method.
-
-Here's a definition example: a RHEL 9.2 image that installs Apache, MariaDB and PHP, customizing firewall, services and filesystems:
+There are multiple customization methods available, most of them documented in the [examples](examples/). Here's a brief definition example: a RHEL 9.2 image that installs Apache, MariaDB and PHP, customizing firewall, services and filesystems:
 ```
 images:
   - name: rhel-9.2-lamp
@@ -141,7 +138,58 @@ images:
           - httpd
           - mariadb
 ```
-See more advanced example definitions, including other image formats, architectures and customizations in [examples/main.yaml](examples/main.yaml).
+See more advanced example definitions, including other image formats, architectures and customizations in [examples/](examples/).
+
+Some customization methods may have their own restrictions, limitations or dependencies. Some notes are provided below for awareness.
+
+#### Repositories
+You may want to use custom content in your image build. For this, you can use a custom repository, where you upload your custom rpms. Once you have that completed, you one or both of the following customization methods:
+
+- `payload_repositories`: A list of repositories to use during the image build. Use this to install custom packages (not available in Red Hat repositories).
+- `custom_repositories`: A list of repositories to be defined inside the image, but not defined or used during the image build. This makes it possible to define an internal repository that is not available to image builder, but is available internally once an instance has been created from the image.
+
+Here's a minimal example that uses both customization methods:
+```
+customizations:
+  packages:
+    - <name of rpm in custom repository>
+  payload_repositories:
+    - id: <id of the custom repository in the hybrid cloud console>
+      check_gpg: <True|False>
+      check_repo_gpg: <True|False>
+      rhsm: false
+  custom_repositories:
+    - name: <name of the custom, internal repository in the target environment where the image is going to be used>
+      id: <id of the custom repository>
+      baseurl:
+        - <the URL of the repository>
+      filename: <name of the file to create in /etc/yum.repos.d>
+      enabled: <True|False>
+      check_gpg: <True|False>
+```
+
+#### Filesystems
+You can define a list of filesystems to create in the image, providing the mountpoint and the size like this:
+```
+customizations:
+  filesystem:
+    - mountpoint: <where the filesystem is mounted>
+      min_size: <size of the filesystem in MB>
+```
+
+Note, however, that ISO and OSTree images don't support filesystems. If you have a customization of type `filesystem` and a type of `edge-installer` or `edge-commit`, the compose request is going to be rejected. See valid image types for Insights Image Builder [here](https://developers.redhat.com/api-catalog/api/image-builder#schema-ImageTypes), and documentation of image types [here](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/composing_a_customized_rhel_system_image/index#specifying-a-custom-filesystem-configuration_creating-system-images-with-composer-command-line-interface).
+
+#### Directories
+You can define new directories or directory structures and define the user, password and mode of the directory, as long as the directory's path is under /etc. If you add directories outside of /etc, the image build request is going to be accepted, but the build is going to fail. This is documented [here](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/composing_a_customized_rhel_system_image/creating-system-images-with-composer-command-line-interface_composing-a-customized-rhel-system-image#specifying_customized_directories_in_the_blueprint).
+
+#### Firewall
+Sligthly different to what the `firewall-cmd --add-port` command expects, adding ports to the firewall in image builder is done with the `:` separator, therefore a list of `<port>:<protocol>` is required. This is documented [here](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/composing_a_customized_rhel_system_image/creating-system-images-with-composer-command-line-interface_composing-a-customized-rhel-system-image#customizing-firewall_creating-system-images-with-composer-command-line-interface).
+
+When adding any customization of type firewall (either ports or services), the firewalld package must also be explicitly added to the list of packages to install, or the image build would fail because the command `firewall-offline-cmd` is not available on the image. Idealy, you would also list `firewalld` on the enabled section of the services customization, in order for the service to start at boot.
+
+#### Restrictions by image_type
+Some customization methods are not supported in combination with specific image types. For example, the image types `rhel-edge-commit` and `rhel-edge-installer` don't support the `kernel` customization method.
+
 
 ### Offline customizations
 It is possible to further customize images after they are downloaded, using the libguestfs `virt-customize` and `virt-edit` commands. To run offline customization commands on any given image, add a dictionary called `offline_customization`, which contains at least one of the following keys:

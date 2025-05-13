@@ -159,3 +159,28 @@ images:
       virt_edit:
         - file: /etc/lvm/lvm.conf
           expression: "s/# use_devicesfile = 1/use_devicesfile = 0/"
+
+  # An RHEL 10 Beta image that makes use of custom repositories to install additional packages.
+  # Create a repository in the hybrid cloud console, then upload your rpms to it, and then list
+  # the repository on the `payload_repositories` list.
+  # The `custom_repositories` are repositories to configure on /etc/yum.repos.d, not used during 
+  # the image build, but available once an instance has been created from the image.
+  - name: rhel10-beta-custom-repo
+    distribution: rhel-10-beta
+    description: RHEL 10 with custom repositories
+    customizations:
+      packages:
+        - htop
+      payload_repositories:
+        - id: 6d75c8ef-3eb8-4fec-b68c-137498b2a88c
+          check_gpg: false
+          check_repo_gpg: false
+          rhsm: false
+      custom_repositories:
+        - name: custom-rpms-beta-rhel10-x86_64
+          id: custom-rpms-beta-rhel10-x86_64
+          baseurl:
+            - http://reposerver.example.com/repos/rhel10/custom-rpms-beta-rhel10-x86_64/
+          filename: corp.repo
+          enabled: true
+          check_gpg: false
