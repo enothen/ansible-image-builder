@@ -1,7 +1,6 @@
 ---
 - name: Run virt-customize command
-  ansible.builtin.shell:
-    virt-customize -a {{ image_path }} {{ customizations }}
+  ansible.builtin.shell: virt-customize -a {{ image_path }} {{ customizations }}
   loop: "{{ filecheck.results }}"
   loop_control:
     label: "{{ image_path }}"

@@ -14,7 +14,7 @@
         - awx_webhook_event_type == "pull_request"
         - awx_webhook_payload['pull_request']['merged'] | bool
         - awx_webhook_payload['pull_request']['base']['ref'] == "main"
-      set_fact:
+      ansible.builtin.set_fact:
         pr_merged_main: true
 
     - name: Fail if this is any other event
