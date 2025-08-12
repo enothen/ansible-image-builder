@@ -1,5 +1,6 @@
-ansible.cfg
-group_vars
 .vscode
-*-artifact-*
+ansible.cfg
 ansible-navigator.log
+group_vars
+inventory.yaml
+*-artifact-*

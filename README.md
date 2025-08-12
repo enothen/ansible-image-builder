@@ -1,7 +1,7 @@
 # enothen.image_builder
 A collection to manage virtualization images using declarative image definitions through the [API interface](https://developers.redhat.com/api-catalog/api/image-builder) of Red Hat's [Insights Image Builder](https://console.redhat.com/insights/image-builder).
 
-- [enothen.image-builder](#enothenimage-builder)
+- [enothen.image\_builder](#enothenimage_builder)
   - [Prerequisites](#prerequisites)
   - [Configuration](#configuration)
   - [Image types](#image-types)
@@ -38,6 +38,18 @@ $ ansible-galaxy collection install enothen.image_builder
 ```
 $ echo 'vault_offline_token: "<your offline token here>"' > group_vars/all/vault
 $ ansible-vault encrypt group_vars/all/vault
+```
+
+1. Create a yaml file where you define the variable `offline_token`, pointing to the vaulted variable, and the definitions of the images that you will create. For example:
+```
+$ cat group_vars/all/main.yml
+---
+offline_token: "{{ vault_offline_token }}"
+images:
+  - name: rhel-9-ib
+    distribution: rhel-9
+  - name: rhel-10-ib
+    distribution: rhel-10
 ```
 
 ## Image types
