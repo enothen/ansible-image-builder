@@ -1,0 +1,23 @@
+---
+- name: Request creation of images
+  ansible.builtin.uri:
+    url: "{{ api_endpoint }}/compose"
+    method: POST
+    headers:
+      Authorization: Bearer {{ refresh_token.json.access_token }}
+    body:
+      image_name: "{{ image.name }}"
+      image_description: "{{ image.description | default(omit) }}"
+      distribution: "{{ image.distribution }}"
+      customizations: "{{ image.customizations | default(omit) }}"
+      image_requests: [ "{{ default_image_request | ansible.builtin.combine(requests, recursive=true) }}" ]
+    body_format: json
+    status_code: 201
+  register: compose_request
+  loop: "{{ filecheck.results }}"
+  loop_control:
+    label: "{{ image.name }}"
+  vars:
+    image: "{{ item.item }}"
+    requests: "{{ image.requests | default({}) }}"
+  when: not item.stat.exists

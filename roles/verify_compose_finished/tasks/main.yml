@@ -1,0 +1,56 @@
+---
+- block:
+    - name: Set retry counter
+      ansible.builtin.set_fact:
+        this_retry: "{{ this_retry | default(0) | int + 1 }}"
+
+    - name: Get compose requests ids if undefined
+      ansible.builtin.include_role:
+        name: enothen.image_builder.get_composes
+      when: compose_request is undefined
+
+    - name: Verify compose request is finished
+      ansible.builtin.uri:
+        url: "{{ api_endpoint }}/composes/{{ item.json.id }}"
+        method: GET
+        headers:
+          Authorization: Bearer {{ refresh_token.json.access_token }}
+        status_code: 200
+      loop: "{{ compose_request.results | default([]) }}"
+      loop_control:
+        label: "{{  image_name }}: compose_status: {{ compose_status }}, upload_status: {{ upload_status }}"
+      vars:
+        image_name: "{{ item.invocation.module_args.body.image_name | default('NoName') }}"
+        compose_status: "{{ compose_status_request.json.image_status.status | default(false) }}"
+        upload_status: "{{ compose_status_request.json.image_status.upload_status.status | default(false) }}"
+      register: compose_status_request
+      when:
+        - item.json is defined
+        - not compose_status_request.failed | default(false)
+        - not compose_status_request.skipped | default(false)
+      until:
+        - compose_status != "building"
+        - compose_status != "pending"
+      retries: "{{ compose_check_retries }}"
+      delay: "{{ compose_check_wait_secs }}"
+
+  rescue:
+    - name: Fail if max attempts tried
+      ansible.builtin.fail:
+        msg: Exhausted {{ compose_check_max_loops }} attempts when checking compose request status
+      when: this_retry | int == compose_check_max_loops
+
+    - name: Renew token
+      ansible.builtin.include_role:
+        name: enothen.image_builder.get_refresh_token
+      when: 401 in compose_status_request.results | map(attribute='status', default='nostatus') | unique
+
+    - name: Unset compose_status_request.failed
+      when: compose_status_request.failed
+      ansible.builtin.set_fact:
+        compose_status_request:
+          failed: false
+
+    - name: Retry verify composes finished
+      ansible.builtin.include_role:
+        name: enothen.image_builder.verify_compose_finished

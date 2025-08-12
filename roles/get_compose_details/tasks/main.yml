@@ -1,0 +1,10 @@
+---
+- name: Get compose details
+  ansible.builtin.uri:
+    url: "{{ api_endpoint }}/composes/{{ compose_id }}"
+    method: GET
+    headers:
+      Authorization: Bearer {{ refresh_token.json.access_token }}
+      Content-Type: application/json
+    status_code: 200
+  register: compose_details

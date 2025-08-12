@@ -1,0 +1,19 @@
+---
+- name: Playbook to list available distributions in Red Hat's image builder service
+  hosts: localhost
+  connection: local
+  become: false
+  gather_facts: false
+
+  tasks:
+    - name: Get refresh token
+      ansible.builtin.import_role:
+        name: enothen.image_builder.get_refresh_token
+
+    - name: Get available RHEL distributions
+      ansible.builtin.import_role:
+        name: enothen.image_builder.get_distributions
+
+    - name: Show available distributions
+      ansible.builtin.debug:
+        var: distributions.json | sort(attribute='name')

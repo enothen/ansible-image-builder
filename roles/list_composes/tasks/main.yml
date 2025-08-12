@@ -1,0 +1,11 @@
+---
+- name: List composes
+  ansible.builtin.debug:
+    msg:
+      - "created_at: {{ item.created_at }}"
+      - "image_name: {{ item.image_name | default('No name') }}"
+      - "image_description: {{ item.request.image_description | default('No description') }}"
+      - "distribution: {{ item.request.distribution }}"
+  loop: "{{ composes.json.data }}"
+  loop_control:
+    label: "id: {{ item.id }}"

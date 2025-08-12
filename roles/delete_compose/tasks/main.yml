@@ -1,0 +1,29 @@
+---
+- name: Debug list of composes to delete
+  loop: "{{ composes.json.data }}"
+  loop_control:
+    label: "{{ item.id }}"
+  vars:
+    image_name: "{{ item.image_name | default(omit) }}"
+  when:
+    - image_name is defined
+    - images | selectattr('name', 'match', image_name) | list | length > 0
+  ansible.builtin.debug:
+    msg: "{{ item.image_name }}"
+
+- name: Delete compose
+  loop: "{{ composes.json.data }}"
+  loop_control:
+    label: "{{ item.id }}"
+  vars:
+    image_name: "{{ item.image_name | default(omit) }}"
+  when:
+    - image_name is defined
+    - images | selectattr('name', 'match', image_name) | list | length > 0
+  ansible.builtin.uri:
+    url: "{{ api_endpoint }}/composes/{{ item.id }}"
+    method: DELETE
+    headers:
+      Authorization: Bearer {{ refresh_token.json.access_token }}
+      Content-Type: application/json
+    status_code: 200

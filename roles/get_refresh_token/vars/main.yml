@@ -1,0 +1,2 @@
+---
+sso_endpoint: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token

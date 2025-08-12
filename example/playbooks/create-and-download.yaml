@@ -1,0 +1,31 @@
+---
+- name: Create and download images at once
+  hosts: localhost
+  gather_facts: false
+  become: false
+
+  tasks:
+    - name: Check if image already exists on disks
+      tags: filecheck
+      ansible.builtin.import_role:
+        name: enothen.image_builder.check_images_exist
+
+    - name: Get refresh token
+      tags: token
+      ansible.builtin.import_role:
+        name: enothen.image_builder.get_refresh_token
+
+    - name: Request creation of images
+      tags: request
+      ansible.builtin.import_role:
+        name: enothen.image_builder.request_image_creation
+
+    - name: Verify composes finished
+      tags: verify
+      ansible.builtin.import_role:
+        name: enothen.image_builder.verify_compose_finished
+
+    - name: Download images
+      tags: download
+      ansible.builtin.import_role:
+        name: enothen.image_builder.download_images

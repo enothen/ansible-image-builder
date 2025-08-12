@@ -1,2 +1,5 @@
-group_vars/all/vault.yaml
+ansible.cfg
+group_vars
 .vscode
+*-artifact-*
+ansible-navigator.log
