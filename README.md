@@ -1,4 +1,4 @@
-# enothen.image-builder
+# enothen.image_builder
 A collection to manage virtualization images using declarative image definitions through the [API interface](https://developers.redhat.com/api-catalog/api/image-builder) of Red Hat's [Insights Image Builder](https://console.redhat.com/insights/image-builder).
 
 - [enothen.image-builder](#enothenimage-builder)
