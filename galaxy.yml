@@ -10,8 +10,13 @@ license:
   - GPL-3.0-or-later
 repository: https://github.com/enothen/ansible-image-builder
 tags:
-  - 'Insights Image Builder'
-  - 'Red Hat Hybrid Cloud Console'
+  - automation
+  - ansible
+  - devops
+  - image_builder
+  - infrastructure_as_code
+  - red_hat_hybrid_cloud_console
+  - virtualization
 dependencies: {}
 build_ignore:
   - .git*

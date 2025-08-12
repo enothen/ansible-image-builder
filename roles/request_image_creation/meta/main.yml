@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  author: Eric Nothen
+  description: A collection to manage virtualization images using declarative image definitions.
+  license: GPL-3.0 license
+  min_ansible_version: 2.1
+  galaxy_tags:
+    - automation
+    - ansible
+    - devops
+    - image_builder
+    - infrastructure_as_code
+    - red_hat_hybrid_cloud_console
+    - virtualization
+dependencies: []
