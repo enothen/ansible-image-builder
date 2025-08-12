@@ -1,0 +1,15 @@
+---
+# Where to check if images exist
+storage_dir: .
+
+# Map image types to file extensions
+image_type_to_extension:
+  guest-image: qcow2
+  edge-commit: tar
+  rhel-edge-commit: tar
+  edge-installer: iso
+  rhel-edge-installer: iso
+  image-installer: iso
+  vsphere: vmdk
+  vsphere-ova: ova
+  wsl: tgz

@@ -1,0 +1,24 @@
+---
+- name: Playbook to show details about a specific compose
+  hosts: localhost
+  connection: local
+  become: false
+  gather_facts: false
+
+  vars_prompt:
+    - name: compose_id
+      prompt: Enter id of compose
+      private: false
+
+  tasks:
+    - name: Get refresh token
+      ansible.builtin.import_role:
+        name: enothen.image_builder.get_refresh_token
+
+    - name: Get compose details
+      ansible.builtin.import_role:
+        name: enothen.image_builder.get_compose_details
+
+    - name: Debug compose details
+      ansible.builtin.debug:
+        var: compose_details.json

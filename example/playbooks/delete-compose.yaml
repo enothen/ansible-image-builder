@@ -1,0 +1,28 @@
+---
+- name: Playbook to delete specific composes from Red Hat's image builder service
+  hosts: localhost
+  connection: local
+  become: false
+  gather_facts: false
+
+  vars_prompt:
+    - name: composes
+      prompt: Enter comma-separated ids of compose to delete
+      private: false
+
+  tasks:
+    - name: Create list of compose ids
+      ansible.builtin.set_fact:
+        composes_list: "{{ composes.split(',') }}"
+
+    - name: Get refresh token
+      ansible.builtin.import_role:
+        name: image_builder
+        tasks_from: get-refresh-token
+
+    - name: Delete compose
+      ansible.builtin.import_role:
+        name: enothen.image_builder.delete_compose    
+      loop: "{{ composes_list }}"
+      vars:
+        compose_id: "{{ item }}"

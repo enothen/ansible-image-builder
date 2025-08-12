@@ -1,0 +1,17 @@
+---
+namespace: enothen
+name: image_builder
+description: A collection to create and manage virtualization images using declarative image definitions through the [API interface](https://developers.redhat.com/api-catalog/api/image-builder) of Red Hat's [Insights Image Builder](https://console.redhat.com/insights/image-builder). 
+version: 0.1.2
+readme: README.md
+authors:
+  - Eric Nothen <example@domain.com>
+license:
+  - GPL-3.0-or-later
+repository: https://github.com/enothen/ansible-image-builder
+tags:
+  - 'Insights Image Builder'
+  - 'Red Hat Hybrid Cloud Console'
+dependencies: {}
+build_ignore:
+  - ansible.cfg 
