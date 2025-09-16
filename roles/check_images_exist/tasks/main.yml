@@ -15,7 +15,7 @@
     file_name: "{{ item.name }}{{ release_str | default('') }}"
     image_request: "{{ default_image_request | ansible.builtin.combine(requests, recursive=true) }}"
     file_extension: "{{ image_type_to_extension[image_request.image_type] | default(item.requests.image_type) }}"
-    path: "{{ storage_dir }}/{{ file_name }}.{{ file_extension }}"
+    path: "{{ storage_dir | default('.') }}/{{ file_name }}.{{ file_extension }}"
   register: filecheck
 
 - name: Show file status
