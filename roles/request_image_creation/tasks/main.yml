@@ -10,7 +10,7 @@
       image_description: "{{ image.description | default(omit) }}"
       distribution: "{{ image.distribution }}"
       customizations: "{{ image.customizations | default(omit) }}"
-      image_requests: [ "{{ default_image_request | ansible.builtin.combine(requests, recursive=true) }}" ]
+      image_requests: ["{{ default_image_request | ansible.builtin.combine(requests, recursive=true) }}"]
     body_format: json
     status_code: 201
   register: compose_request

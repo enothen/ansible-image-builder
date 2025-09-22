@@ -1,6 +1,6 @@
 ---
 # If using github to trigger build, set release id to match the pull request id
-release_id: "pr{{ awx_webhook_payload.pull_request.number }}"
+release_id: pr{{ awx_webhook_payload.pull_request.number }}
 # Optionally set a release date
 release_date: "2025-02-12"
 
@@ -82,7 +82,7 @@ images:
           enabled:
             - ssh
       kernel:
-        append: "audit_backlog_limit=8192 audit=1 net.naming-scheme=rhel-8.4"
+        append: audit_backlog_limit=8192 audit=1 net.naming-scheme=rhel-8.4
       services:
         enabled:
           - crond
@@ -155,10 +155,10 @@ images:
           min_size: 10240
     offline_customization:
       virt_customize:
-        - "--link /usr/bin/dracut:/sbin/dracut"
+        - --link /usr/bin/dracut:/sbin/dracut
       virt_edit:
         - file: /etc/lvm/lvm.conf
-          expression: "s/# use_devicesfile = 1/use_devicesfile = 0/"
+          expression: s/# use_devicesfile = 1/use_devicesfile = 0/
 
   # An RHEL 10 Beta image that makes use of custom repositories to install additional packages.
   # Create a repository in the hybrid cloud console, then upload your rpms to it, and then list
