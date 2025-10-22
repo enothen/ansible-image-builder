@@ -17,8 +17,7 @@
 
     - name: Get refresh token
       ansible.builtin.import_role:
-        name: image_builder
-        tasks_from: get-refresh-token
+        name: enothen.image_builder.get_refresh_token
 
     - name: Delete compose
       ansible.builtin.import_role:
