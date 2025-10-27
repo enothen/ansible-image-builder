@@ -21,7 +21,7 @@
 
     - name: Delete compose
       ansible.builtin.import_role:
-        name: enothen.image_builder.delete_compose    
+        name: enothen.image_builder.delete_compose
       loop: "{{ composes_list }}"
       vars:
         compose_id: "{{ item }}"

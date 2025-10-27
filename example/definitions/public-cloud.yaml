@@ -60,7 +60,7 @@ images:
         type: gcp
         options:
           share_with_accounts:
-            - "user:account@domain.com"
+            - user:account@domain.com
 
   # An image for Oracle Cloud infrastructure that is left in an OCI storage bucket, available to be
   # (manually) imported and used. Image Builder does not do this automatically in the case of OCI.
