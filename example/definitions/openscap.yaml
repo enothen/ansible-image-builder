@@ -25,7 +25,7 @@ images:
         - mountpoint: /var/tmp
           min_size: 1073741824
       kernel:
-        append: "audit_backlog_limit=8192 audit=1"
+        append: audit_backlog_limit=8192 audit=1
       openscap:
         profile_id: xccdf_org.ssgproject.content_profile_cis
       packages:
@@ -64,7 +64,7 @@ images:
         - mountpoint: /var/log/audit
           min_size: 10737418240
       kernel:
-        append: "audit_backlog_limit=8192 audit=1 vsyscall=none page_alloc.shuffle=1 init_on_alloc=1"
+        append: audit_backlog_limit=8192 audit=1 vsyscall=none page_alloc.shuffle=1 init_on_alloc=1
       openscap:
         profile_id: xccdf_org.ssgproject.content_profile_cui
       packages:
